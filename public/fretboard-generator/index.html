@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Usonian Fretboard Generator v4.2.0</title>
+<style>
+:root{--walnut:#4B2E15;--copper:#C16E36;--tan:#E6D5B8;--charcoal:#2E2E2E;--paper:#fffdf8;--green:#2e6b3f}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--charcoal);background:#f4f1ea}header{background:var(--walnut);color:#fff;padding:18px 22px;border-bottom:5px solid var(--copper)}header h1{margin:0;font-size:1.45rem}header p{margin:6px 0 0}main{display:grid;grid-template-columns:minmax(320px,410px) 1fr;gap:18px;max-width:1450px;margin:auto;padding:18px}.panel{background:var(--paper);border:1px solid #d4cec2;border-radius:8px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.05)}.section-title{margin:4px 0 12px;font-size:1rem;color:var(--walnut);border-bottom:1px solid #ddd;padding-bottom:7px}.field{display:grid;grid-template-columns:1fr 140px;align-items:center;gap:10px;margin-bottom:12px}label{font-weight:700;font-size:.93rem}input,select,button{font:inherit;border:1px solid #aaa;border-radius:5px;padding:8px 9px}button{border:none;color:#fff;background:var(--copper);cursor:pointer;font-weight:700;padding:10px 12px}button.secondary{background:var(--charcoal)}button.green{background:var(--green)}button.light{background:#777}button.danger{background:#9b1c1c}.buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.buttons.one{grid-template-columns:1fr}.check{display:flex;gap:8px;align-items:center;margin:9px 0}.check input{width:auto}#message,#saveMessage{min-height:22px;margin-top:9px;font-weight:700;font-size:.9rem}.ok{color:#27632a}.error{color:#9b1c1c}.note{margin-top:14px;padding:11px;background:var(--tan);border-radius:5px;font-size:.84rem;line-height:1.45}.saved-box{background:#f7f4ed;border:1px solid #ddd;border-radius:6px;padding:12px;margin-bottom:18px}.saved-row{display:grid;grid-template-columns:1fr 120px;gap:8px;margin-bottom:8px}.saved-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.summary{display:grid;grid-template-columns:repeat(4,minmax(100px,1fr));gap:8px;margin-bottom:12px}.summary div{background:#f7f4ed;border-left:4px solid var(--copper);padding:8px 10px}.summary small{display:block;color:#666}.summary strong{display:block;margin-top:3px}#previewWrap{min-height:720px;overflow:auto;border:1px solid #ccc;border-radius:6px;background:#fff}#preview{display:block;width:100%;min-width:500px;min-height:700px}footer{max-width:1450px;margin:0 auto 24px;padding:0 18px;text-align:center;color:#777;font-size:.86rem}@media(max-width:900px){main{grid-template-columns:1fr}.summary{grid-template-columns:repeat(2,1fr)}}
+#printArea{display:none}
+@media print{
+  body > header, body > main, body > footer{display:none !important}
+  #printArea{display:block !important}
+  @page{margin:0}
+  html,body,#printArea{margin:0 !important;padding:0 !important}
+  .print-page{
+    position:relative;
+    overflow:hidden;
+    background:white;
+    break-inside:avoid-page;
+    page-break-inside:avoid;
+  }
+  .print-page + .print-page{
+    break-before:page;
+    page-break-before:always;
+  }
+  .print-page svg{display:block}
+}
+
+</style>
+</head>
+<body>
+<header><h1>USONIAN GUITAR CO. — FRETBOARD GENERATOR</h1><p><strong>Version 4.2.0</strong> • Saved Fretboards • Easel SVG Export</p></header>
+<main>
+<section class="panel">
+<h2 class="section-title">Saved Fretboards</h2>
+<div class="saved-box">
+<div class="saved-row"><input id="projectName" type="text" placeholder="Name this fretboard"><button id="saveProject" class="green">Save</button></div>
+<div class="saved-row"><select id="savedProjects"><option value="">— Saved fretboards —</option></select><button id="loadProject" class="secondary">Load</button></div>
+<div class="saved-actions"><button id="renameProject" class="light">Rename</button><button id="duplicateProject" class="light">Duplicate</button><button id="deleteProject" class="danger">Delete</button></div>
+<div id="saveMessage"></div>
+</div>
+<h2 class="section-title">Fretboard Dimensions</h2>
+<div class="field"><label for="units">Units</label><select id="units"><option value="in">Inches</option><option value="mm">Millimeters</option></select></div>
+<div class="field"><label for="scale">Scale length</label><input id="scale" type="number" step="0.001" value="25.400"></div>
+<div class="field"><label for="nutWidth">Nut width</label><input id="nutWidth" type="number" step="0.001" value="1.750"></div>
+<div class="field"><label for="width14">Width at 14th fret</label><input id="width14" type="number" step="0.001" value="2.125"></div>
+<div class="field"><label for="frets">Number of frets</label><input id="frets" type="number" min="1" max="36" step="1" value="20"></div>
+<div class="field"><label for="extension">Extension past last fret</label><input id="extension" type="number" min="0" step="0.001" value="0.250"></div>
+<div class="field"><label for="overrun">Fret overrun per side</label><input id="overrun" type="number" min="0" step="0.001" value="0.030"></div>
+<h2 class="section-title">Options</h2>
+<div class="check"><input id="nutline" type="checkbox" checked><label for="nutline">Include nut line</label></div>
+<div class="field"><label for="nutThickness">Nut thickness</label><input id="nutThickness" type="number" min="0" step="0.001" value="0.157"></div>
+<div class="check"><input id="centerline" type="checkbox"><label for="centerline">Include centerline in outline file</label></div>
+<div class="buttons one"><button id="generate">Generate Preview</button></div>
+
+<h2 class="section-title" style="margin-top:18px">Paper Template</h2>
+<div class="field"><label for="paperSize">Paper size</label><select id="paperSize"><option value="letter">US Letter (8.5 × 11 in)</option><option value="a4">A4 (210 × 297 mm)</option></select></div>
+<div class="field"><label for="pageOverlap">Page overlap</label><input id="pageOverlap" type="number" min="0" step="0.01" value="0.25"></div>
+<div class="check"><input id="printFretNumbers" type="checkbox" checked><label for="printFretNumbers">Show fret numbers</label></div>
+<div class="check"><input id="printCenterline" type="checkbox" checked><label for="printCenterline">Show centerline</label></div>
+<div class="buttons one"><button id="printTemplate" class="green">Print 1:1 Fretboard Template</button></div>
+<div class="note">
+Print at <strong>100% / Actual Size</strong>. Do not use “Fit to Page.” The template includes registration marks and overlapping alignment areas so the pages can be taped together accurately.
+</div>
+
+<h2 class="section-title" style="margin-top:18px">Easel SVG Files</h2>
+<div class="field"><label for="exportName">Export filename</label><input id="exportName" type="text" placeholder="Uses saved fretboard name"></div>
+<div class="buttons"><button id="downloadSlots" class="secondary">Fret Slots SVG</button><button id="downloadOutline" class="secondary">Outline SVG</button></div>
+<div class="buttons one"><button id="downloadCombined" class="light">Combined SVG</button></div>
+<div id="message"></div>
+<div class="note"><strong>Recommended Easel workflow:</strong> import the fret slots and fretboard outline as separate SVG files. The outline is one continuous closed path; each fret is one open centerline.</div>
+<div class="note"><strong>Export:</strong> enter a filename above. On supported desktop browsers, export opens a Save As dialog where you can choose the folder and filename. On iPhone/Safari, the browser uses the normal iOS download/save workflow.<br><br><strong>Saved fretboards:</strong> named designs are stored in this browser on this device. They persist when you return to the site, but do not automatically sync to another device.</div>
+</section>
+<section class="panel"><div class="summary"><div><small>12th fret</small><strong id="s12">—</strong></div><div><small>14th fret</small><strong id="s14">—</strong></div><div><small>Board length</small><strong id="sLength">—</strong></div><div><small>End width</small><strong id="sEndWidth">—</strong></div></div><div id="previewWrap"><svg id="preview" xmlns="http://www.w3.org/2000/svg"></svg></div></section>
+</main>
+<div id="printArea" aria-hidden="true"></div>
+<footer>Usonian Guitar Co. • Fretboard Generator • Version 4.2.0 • Last Updated 2026-08-07</footer>
+<script>
+(()=>{"use strict";
+const VERSION="4.2.0", STORAGE_KEY="usonian-fretboard-projects-v1", $=id=>document.getElementById(id);let files={slots:"",outline:"",combined:""};
+const factor=()=>$("units").value==="in"?25.4:1;const num=id=>Number($(id).value);const fretPos=(s,n)=>s*(1-Math.pow(2,-n/12));
+function widthAt(pos,nut,w14,f14){return Math.abs(w14-nut)<1e-9?nut:nut+(w14-nut)*(pos/f14)}
+function shown(mm){const inch=$("units").value==="in",v=inch?mm/25.4:mm;return v.toFixed(inch?4:2)+" "+(inch?"in":"mm")}
+function parameters(){const f=factor(),p={units:$("units").value,scale:num("scale")*f,nut:num("nutWidth")*f,width14:num("width14")*f,frets:Math.round(num("frets")),extension:num("extension")*f,overrun:num("overrun")*f,nutline:$("nutline").checked,nutThickness:num("nutThickness")*f,centerline:$("centerline").checked};if(![p.scale,p.nut,p.width14,p.extension,p.overrun,p.nutThickness].every(Number.isFinite))throw Error("All dimensions must be valid numbers.");if(p.scale<=0||p.nut<=0||p.width14<=0)throw Error("Scale length and widths must be greater than zero.");if(p.frets<1||p.frets>36)throw Error("Number of frets must be 1–36.");if(p.width14<p.nut)throw Error("Width at the 14th fret cannot be less than the nut width.");return p}
+function geometry(p){const f14=fretPos(p.scale,14),last=fretPos(p.scale,p.frets),length=last+p.extension,endWidth=widthAt(length,p.nut,p.width14,f14),topExtra=p.nutline?p.nutThickness:0,margin=Math.max(12,endWidth*.3),vw=endWidth+margin*2,vh=length+topExtra+margin*2,cx=vw/2,yNut=margin+topExtra,yEnd=yNut+length,nl=cx-p.nut/2,nr=cx+p.nut/2,el=cx-endWidth/2,er=cx+endWidth/2;const outlinePath=`M ${nl.toFixed(4)} ${yNut.toFixed(4)} L ${nr.toFixed(4)} ${yNut.toFixed(4)} L ${er.toFixed(4)} ${yEnd.toFixed(4)} L ${el.toFixed(4)} ${yEnd.toFixed(4)} Z`;let fretLines="";for(let n=1;n<=p.frets;n++){const pos=fretPos(p.scale,n),y=yNut+pos,w=widthAt(pos,p.nut,p.width14,f14)+p.overrun*2;fretLines+=`<line id="FRET_${n}" x1="${(cx-w/2).toFixed(4)}" y1="${y.toFixed(4)}" x2="${(cx+w/2).toFixed(4)}" y2="${y.toFixed(4)}"/>\n`}const nutLine=p.nutline?`<line id="NUT_LINE" x1="${nl.toFixed(4)}" y1="${(yNut-p.nutThickness).toFixed(4)}" x2="${nr.toFixed(4)}" y2="${(yNut-p.nutThickness).toFixed(4)}"/>`:"";const center=p.centerline?`<line id="CENTERLINE" x1="${cx.toFixed(4)}" y1="${(yNut-topExtra).toFixed(4)}" x2="${cx.toFixed(4)}" y2="${yEnd.toFixed(4)}"/>`:"";return{f14,length,endWidth,vw,vh,outlinePath,fretLines,nutLine,center}}
+function shell(g,body,title,desc){return `<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" width="${g.vw.toFixed(4)}mm" height="${g.vh.toFixed(4)}mm" viewBox="0 0 ${g.vw.toFixed(4)} ${g.vh.toFixed(4)}"><title>${title}</title><desc>Usonian Fretboard Generator v${VERSION}. ${desc}</desc>${body}</svg>`}
+function buildFiles(p){const g=geometry(p),outlineBody=`<g id="FRETBOARD_OUTLINE" fill="none" stroke="#000" stroke-width="0.01"><path d="${g.outlinePath}"/>${g.center}</g>`,slotsBody=`<g id="FRET_LINES" fill="none" stroke="#000" stroke-width="0.01">${g.fretLines}${g.nutLine}</g>`;files.outline=shell(g,outlineBody,"Usonian Fretboard Outline","One continuous closed fretboard perimeter.");files.slots=shell(g,slotsBody,"Usonian Fret Slots","Each fret is one open SVG line.");files.combined=shell(g,outlineBody+slotsBody,"Usonian Fretboard Combined","Combined outline and slots.");return g}
+function render(){const m=$("message");try{const p=parameters(),g=buildFiles(p),doc=new DOMParser().parseFromString(files.combined,"image/svg+xml"),node=document.importNode(doc.documentElement,true);node.removeAttribute("width");node.removeAttribute("height");node.setAttribute("preserveAspectRatio","xMidYMid meet");$("preview").replaceWith(node);node.id="preview";$("s12").textContent=shown(fretPos(p.scale,12));$("s14").textContent=shown(g.f14);$("sLength").textContent=shown(g.length);$("sEndWidth").textContent=shown(g.endWidth);m.className="ok";m.textContent="Fretboard generated."}catch(e){m.className="error";m.textContent=e.message}}
+function cleanFileBase(name){
+  return (name||"Usonian_Fretboard")
+    .trim()
+    .replace(/\.svg$/i,"")
+    .replace(/[\\/:*?"<>|]+/g,"-")
+    .replace(/\s+/g," ")
+    .trim() || "Usonian_Fretboard";
+}
+function exportBase(){
+  return cleanFileBase($("exportName").value || $("projectName").value || "Usonian_Fretboard");
+}
+async function saveFile(text,suffix){
+  if(!text)render();
+  const filename=exportBase()+" - "+suffix+".svg";
+  const blob=new Blob([text],{type:"image/svg+xml;charset=utf-8"});
+
+  // Chromium/Edge desktop: opens a true Save As dialog so the user
+  // can choose both folder and filename.
+  if("showSaveFilePicker" in window){
+    try{
+      const handle=await window.showSaveFilePicker({
+        suggestedName:filename,
+        types:[{
+          description:"SVG image",
+          accept:{"image/svg+xml":[".svg"]}
+        }]
+      });
+      const writable=await handle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+      $("message").className="ok";
+      $("message").textContent='Saved "'+handle.name+'".';
+      return;
+    }catch(err){
+      if(err && err.name==="AbortError")return;
+      // Fall through to normal browser download if picker fails.
+    }
+  }
+
+  // Safari/iPhone and browsers without the File System Access API.
+  const url=URL.createObjectURL(blob),a=document.createElement("a");
+  a.href=url;
+  a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  $("message").className="ok";
+  $("message").textContent='Exported "'+filename+'". Use your browser/device save controls to choose its destination.';
+}
+function getProjects(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||"{}")}catch{return{}}}function setProjects(p){localStorage.setItem(STORAGE_KEY,JSON.stringify(p))}
+function state(){return{units:$("units").value,scale:$("scale").value,nutWidth:$("nutWidth").value,width14:$("width14").value,frets:$("frets").value,extension:$("extension").value,overrun:$("overrun").value,nutline:$("nutline").checked,nutThickness:$("nutThickness").value,centerline:$("centerline").checked,
+    paperSize:$("paperSize").value,
+    pageOverlap:$("pageOverlap").value,
+    printFretNumbers:$("printFretNumbers").checked,
+    printCenterline:$("printCenterline").checked,savedAt:new Date().toISOString(),exportName:$("exportName").value,
+    version:VERSION}}
+function apply(s){["units","scale","nutWidth","width14","frets","extension","overrun","nutThickness","exportName"].forEach(id=>{if(s[id]!==undefined)$(id).value=s[id]});if(s.nutline!==undefined)$("nutline").checked=s.nutline;if(s.centerline!==undefined)$("centerline").checked=s.centerline;render()}
+function refresh(selected=""){const p=getProjects(),s=$("savedProjects");s.innerHTML='<option value="">— Saved fretboards —</option>';Object.keys(p).sort().forEach(n=>{const o=document.createElement("option");o.value=n;o.textContent=n;s.appendChild(o)});if(selected&&p[selected])s.value=selected}
+function saveProject(){const n=$("projectName").value.trim(),m=$("saveMessage");if(!n){m.className="error";m.textContent="Enter a name for this fretboard.";return}const p=getProjects();p[n]=state();setProjects(p);refresh(n);m.className="ok";m.textContent=`Saved "${n}".`}
+function loadProject(){const n=$("savedProjects").value,m=$("saveMessage"),p=getProjects();if(!n||!p[n]){m.className="error";m.textContent="Choose a saved fretboard first.";return}$("projectName").value=n;apply(p[n]);m.className="ok";m.textContent=`Loaded "${n}".`}
+function renameProject(){const old=$("savedProjects").value,m=$("saveMessage"),p=getProjects();if(!old||!p[old])return;const next=prompt("New name:",old);if(!next||!next.trim())return;const n=next.trim();p[n]=p[old];if(n!==old)delete p[old];setProjects(p);refresh(n);$("projectName").value=n;$("exportName").value=n;m.className="ok";m.textContent=`Renamed to "${n}".`}
+function duplicateProject(){const old=$("savedProjects").value,m=$("saveMessage"),p=getProjects();if(!old||!p[old])return;let n=old+" Copy",i=2;while(p[n])n=old+" Copy "+i++;p[n]={...p[old],savedAt:new Date().toISOString()};setProjects(p);refresh(n);$("projectName").value=n;$("exportName").value=n;m.className="ok";m.textContent=`Created "${n}".`}
+function deleteProject(){const n=$("savedProjects").value,m=$("saveMessage"),p=getProjects();if(!n||!p[n])return;if(!confirm(`Delete "${n}"?`))return;delete p[n];setProjects(p);refresh();if($("projectName").value===n)$("projectName").value="";m.className="ok";m.textContent=`Deleted "${n}".`}
+
+function mmToCss(mm){return (mm/25.4)+"in"}
+
+function printTemplate(){
+  let p;
+  try{p=parameters()}catch(e){
+    $("message").className="error";
+    $("message").textContent=e.message;
+    return;
+  }
+
+  const g=geometry(p);
+  const paper=$("paperSize").value;
+  // Keep the generated sheet 1 mm inside the physical paper boundary.
+  // This prevents browser rounding from spilling a sheet onto an extra page.
+  const pageW=paper==="a4"?209:215;
+  const pageH=paper==="a4"?296:279;
+  const margin=10;
+  const overlapInput=Number($("pageOverlap").value);
+  const overlapMm=(Number.isFinite(overlapInput)?overlapInput:0.25) * ($("units").value==="in"?25.4:1);
+
+  const printableW=pageW-margin*2;
+  const printableH=pageH-margin*2;
+  const boardW=Math.max(p.nut,g.endWidth);
+  const f14=fretPos(p.scale,14);
+  const last=fretPos(p.scale,p.frets);
+  const boardLen=last+p.extension;
+  const nutExtra=p.nutline?p.nutThickness:0;
+  const totalLen=boardLen+nutExtra;
+  const step=Math.max(10, printableH-overlapMm);
+  const pages=Math.max(1,Math.ceil((totalLen-printableH)/step)+1);
+
+  const xCenter=pageW/2;
+  const xNutL=xCenter-p.nut/2;
+  const xNutR=xCenter+p.nut/2;
+  const xEndL=xCenter-g.endWidth/2;
+  const xEndR=xCenter+g.endWidth/2;
+
+  const fullSvgParts=[];
+  const yNut=nutExtra;
+  const yEnd=yNut+boardLen;
+  fullSvgParts.push(`<path d="M ${xNutL} ${yNut} L ${xNutR} ${yNut} L ${xEndR} ${yEnd} L ${xEndL} ${yEnd} Z" fill="none" stroke="black" stroke-width="0.25"/>`);
+
+  for(let n=1;n<=p.frets;n++){
+    const pos=fretPos(p.scale,n);
+    const y=yNut+pos;
+    const w=widthAt(pos,p.nut,p.width14,f14);
+    const x1=xCenter-w/2, x2=xCenter+w/2;
+    fullSvgParts.push(`<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="black" stroke-width="0.18"/>`);
+    if($("printFretNumbers").checked){
+      fullSvgParts.push(`<text x="${x1-3}" y="${y+1.2}" font-family="Arial" font-size="3" text-anchor="end">${n}</text>`);
+    }
+  }
+
+  if(p.nutline){
+    fullSvgParts.push(`<line x1="${xNutL}" y1="0" x2="${xNutR}" y2="0" stroke="black" stroke-width="0.18"/>`);
+  }
+  if($("printCenterline").checked){
+    fullSvgParts.push(`<line x1="${xCenter}" y1="0" x2="${xCenter}" y2="${totalLen}" stroke="#777" stroke-width="0.15" stroke-dasharray="2 2"/>`);
+  }
+
+  const area=$("printArea");
+  area.innerHTML="";
+
+  for(let page=0;page<pages;page++){
+    const startY=page*step;
+    const endY=startY+printableH;
+    const div=document.createElement("div");
+    div.className="print-page";
+    div.style.width=mmToCss(pageW);
+    div.style.height=mmToCss(pageH);
+
+    const regTop=margin+4, regBottom=pageH-margin-4;
+
+    div.innerHTML=`
+      <svg xmlns="http://www.w3.org/2000/svg" width="${pageW}mm" height="${pageH}mm" viewBox="0 0 ${pageW} ${pageH}">
+        <rect x="0" y="0" width="${pageW}" height="${pageH}" fill="white"/>
+        <g transform="translate(0 ${margin-startY})">
+          ${fullSvgParts.join("")}
+        </g>
+
+        <g stroke="#666" stroke-width="0.18" fill="none">
+          <path d="M ${margin-4} ${regTop} h 8 M ${margin} ${regTop-4} v 8"/>
+          <path d="M ${pageW-margin-4} ${regTop} h 8 M ${pageW-margin} ${regTop-4} v 8"/>
+          <path d="M ${margin-4} ${regBottom} h 8 M ${margin} ${regBottom-4} v 8"/>
+          <path d="M ${pageW-margin-4} ${regBottom} h 8 M ${pageW-margin} ${regBottom-4} v 8"/>
+        </g>
+
+        <text x="${margin}" y="${pageH-5}" font-family="Arial" font-size="3.2">
+          ${($("projectName").value||"Usonian Fretboard")} — v${VERSION} — Page ${page+1} of ${pages} — Print at 100% / Actual Size
+        </text>
+
+      </svg>`;
+    area.appendChild(div);
+  }
+
+  $("message").className="ok";
+  $("message").textContent=`Prepared ${pages} print page${pages===1?"":"s"}. In the print dialog choose 100% / Actual Size.`;
+  window.print();
+}
+
+$("generate").onclick=render;
+$("printTemplate").onclick=printTemplate;$("downloadSlots").onclick=()=>saveFile(files.slots,"Fret Slots");$("downloadOutline").onclick=()=>saveFile(files.outline,"Outline");$("downloadCombined").onclick=()=>saveFile(files.combined,"Combined");$("saveProject").onclick=saveProject;$("loadProject").onclick=loadProject;$("renameProject").onclick=renameProject;$("duplicateProject").onclick=duplicateProject;$("deleteProject").onclick=deleteProject;
+$("units").addEventListener("change",()=>{const toIn=$("units").value==="in";["scale","nutWidth","width14","extension","overrun","nutThickness"].forEach(id=>{const e=$(id),v=Number(e.value);if(Number.isFinite(v))e.value=(toIn?v/25.4:v*25.4).toFixed(toIn?4:2)});render()});refresh();render();
+})();
+</script>
+</body>
+</html>
