@@ -7,7 +7,7 @@ const products = [
   ["03", "Rosette & Layout Tools", "Practical fixtures and marking aids for accurate, repeatable acoustic-guitar construction."],
 ];
 const tools = [
-  ["Fretboard Generator", "Lay out, save, print, and export custom fretboards.", "/tools/fretboard/index.html"],
+  ["Fretboard Generator", "Lay out, save, print, and export custom fretboards.", "/fretboard-generator/"],
   ["Radius Dish Creator", "Generate STL and CNC toolpaths for radius dishes.", `${toolsSite}radius-dish/`],
 ];
 const nutGuides = [
