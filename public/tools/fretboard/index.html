@@ -169,11 +169,13 @@ function printTemplate(){
   const pageW=paper==="a4"?209:215;
   const pageH=paper==="a4"?296:279;
   const margin=10;
+  const footerBand=14;
   const overlapInput=Number($("pageOverlap").value);
   const overlapMm=(Number.isFinite(overlapInput)?overlapInput:0.25) * ($("units").value==="in"?25.4:1);
 
   const printableW=pageW-margin*2;
-  const printableH=pageH-margin*2;
+  // Reserve a protected footer band so the template never crosses the page label.
+  const printableH=pageH-margin-footerBand;
   const boardW=Math.max(p.nut,g.endWidth);
   const f14=fretPos(p.scale,14);
   const last=fretPos(p.scale,p.frets);
@@ -227,8 +229,13 @@ function printTemplate(){
 
     div.innerHTML=`
       <svg xmlns="http://www.w3.org/2000/svg" width="${pageW}mm" height="${pageH}mm" viewBox="0 0 ${pageW} ${pageH}">
+        <defs>
+          <clipPath id="templateClip${page}">
+            <rect x="0" y="${margin}" width="${pageW}" height="${printableH}"/>
+          </clipPath>
+        </defs>
         <rect x="0" y="0" width="${pageW}" height="${pageH}" fill="white"/>
-        <g transform="translate(0 ${margin-startY})">
+        <g clip-path="url(#templateClip${page})" transform="translate(0 ${margin-startY})">
           ${fullSvgParts.join("")}
         </g>
 
