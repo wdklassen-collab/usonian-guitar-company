@@ -11,7 +11,7 @@
 @media print{
   body > header, body > main, body > footer{display:none !important}
   #printArea{display:block !important}
-  @page{margin:0}
+  @page{size:portrait;margin:0}
   html,body,#printArea{margin:0 !important;padding:0 !important}
   .print-page{
     position:relative;
@@ -61,7 +61,7 @@
 <div class="check"><input id="printCenterline" type="checkbox" checked><label for="printCenterline">Show centerline</label></div>
 <div class="buttons one"><button id="printTemplate" class="green">Print 1:1 Fretboard Template</button></div>
 <div class="note">
-Print at <strong>100% / Actual Size</strong>. Do not use “Fit to Page.” The template includes registration marks and overlapping alignment areas so the pages can be taped together accurately.
+Print in <strong>Portrait</strong> orientation at <strong>100% / Actual Size</strong>. Do not use “Fit to Page.” The template includes registration marks and overlapping alignment areas so the pages can be taped together accurately.
 </div>
 
 <h2 class="section-title" style="margin-top:18px">Easel SVG Files</h2>
@@ -240,7 +240,7 @@ function printTemplate(){
         </g>
 
         <text x="${margin}" y="${pageH-5}" font-family="Arial" font-size="3.2">
-          ${($("projectName").value||"Usonian Fretboard")} — v${VERSION} — Page ${page+1} of ${pages} — Print at 100% / Actual Size
+          ${($("projectName").value||"Usonian Fretboard")} — v${VERSION} — Page ${page+1} of ${pages} — Portrait — Print at 100% / Actual Size
         </text>
 
       </svg>`;
@@ -248,7 +248,7 @@ function printTemplate(){
   }
 
   $("message").className="ok";
-  $("message").textContent=`Prepared ${pages} print page${pages===1?"":"s"}. In the print dialog choose 100% / Actual Size.`;
+  $("message").textContent=`Prepared ${pages} print page${pages===1?"":"s"}. In the print dialog choose Portrait and 100% / Actual Size.`;
   window.print();
 }
 
