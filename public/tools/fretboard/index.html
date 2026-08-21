@@ -235,8 +235,10 @@ function printTemplate(){
           </clipPath>
         </defs>
         <rect x="0" y="0" width="${pageW}" height="${pageH}" fill="white"/>
-        <g clip-path="url(#templateClip${page})" transform="translate(0 ${margin-startY})">
-          ${fullSvgParts.join("")}
+        <g clip-path="url(#templateClip${page})">
+          <g transform="translate(0 ${margin-startY})">
+            ${fullSvgParts.join("")}
+          </g>
         </g>
 
         <g stroke="#666" stroke-width="0.18" fill="none">
