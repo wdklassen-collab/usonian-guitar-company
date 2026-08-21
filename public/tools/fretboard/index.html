@@ -12,14 +12,18 @@
   body > header, body > main, body > footer{display:none !important}
   #printArea{display:block !important}
   @page{margin:0}
+  html,body,#printArea{margin:0 !important;padding:0 !important}
   .print-page{
     position:relative;
-    page-break-after:always;
-    break-after:page;
     overflow:hidden;
     background:white;
+    break-inside:avoid-page;
+    page-break-inside:avoid;
   }
-  .print-page:last-child{page-break-after:auto;break-after:auto}
+  .print-page + .print-page{
+    break-before:page;
+    page-break-before:always;
+  }
   .print-page svg{display:block}
 }
 
@@ -57,7 +61,7 @@
 <div class="check"><input id="printCenterline" type="checkbox" checked><label for="printCenterline">Show centerline</label></div>
 <div class="buttons one"><button id="printTemplate" class="green">Print 1:1 Fretboard Template</button></div>
 <div class="note">
-Print at <strong>100% / Actual Size</strong>. Do not use “Fit to Page.” The template includes registration marks and a 6-inch / 150-mm verification scale so you can confirm the printout before gluing it to the blank.
+Print at <strong>100% / Actual Size</strong>. Do not use “Fit to Page.” The template includes registration marks and overlapping alignment areas so the pages can be taped together accurately.
 </div>
 
 <h2 class="section-title" style="margin-top:18px">Easel SVG Files</h2>
@@ -160,8 +164,10 @@ function printTemplate(){
 
   const g=geometry(p);
   const paper=$("paperSize").value;
-  const pageW=paper==="a4"?210:215.9;
-  const pageH=paper==="a4"?297:279.4;
+  // Keep the generated sheet 1 mm inside the physical paper boundary.
+  // This prevents browser rounding from spilling a sheet onto an extra page.
+  const pageW=paper==="a4"?209:215;
+  const pageH=paper==="a4"?296:279;
   const margin=10;
   const overlapInput=Number($("pageOverlap").value);
   const overlapMm=(Number.isFinite(overlapInput)?overlapInput:0.25) * ($("units").value==="in"?25.4:1);
@@ -218,8 +224,6 @@ function printTemplate(){
     div.style.height=mmToCss(pageH);
 
     const regTop=margin+4, regBottom=pageH-margin-4;
-    const verifyLen=$("units").value==="in"?152.4:150;
-    const verifyLabel=$("units").value==="in"?'6 inch verification line':'150 mm verification line';
 
     div.innerHTML=`
       <svg xmlns="http://www.w3.org/2000/svg" width="${pageW}mm" height="${pageH}mm" viewBox="0 0 ${pageW} ${pageH}">
@@ -239,13 +243,6 @@ function printTemplate(){
           ${($("projectName").value||"Usonian Fretboard")} — v${VERSION} — Page ${page+1} of ${pages} — Print at 100% / Actual Size
         </text>
 
-        ${page===0 ? `
-        <g transform="translate(${margin} 6)">
-          <line x1="0" y1="0" x2="${verifyLen}" y2="0" stroke="black" stroke-width="0.3"/>
-          <line x1="0" y1="-2" x2="0" y2="2" stroke="black" stroke-width="0.3"/>
-          <line x1="${verifyLen}" y1="-2" x2="${verifyLen}" y2="2" stroke="black" stroke-width="0.3"/>
-          <text x="${verifyLen/2}" y="4" font-family="Arial" font-size="3" text-anchor="middle">${verifyLabel}</text>
-        </g>` : ``}
       </svg>`;
     area.appendChild(div);
   }
