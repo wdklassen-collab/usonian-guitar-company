@@ -7,8 +7,8 @@ const products = [
   ["03", "Rosette & Layout Tools", "Practical fixtures and marking aids for accurate, repeatable acoustic-guitar construction."],
 ];
 const tools = [
-  ["Fretboard Generator", "Lay out, save, print, and export custom fretboards.", "fretboard/"],
-  ["Radius Dish Creator", "Generate STL and CNC toolpaths for radius dishes.", "radius-dish/"],
+  ["Fretboard Generator", "Lay out, save, print, and export custom fretboards.", "/tools/fretboard/index.html"],
+  ["Radius Dish Creator", "Generate STL and CNC toolpaths for radius dishes.", `${toolsSite}radius-dish/`],
 ];
 const nutGuides = [
   ["Steel-string guitar", "usonian_steel_string_guitar_nut_spacing_guide"],
@@ -56,7 +56,7 @@ export default function Home() {
     <section className="tools-section" id="tools">
       <div className="section-heading light"><p className="eyebrow">Free builder resources</p><h2>Useful tools belong on the bench.</h2><p>Create accurate layouts and CNC-ready files directly in your browser. No account or installation required.</p></div>
       <div className="tool-list">
-        {tools.map(([title,text,path],index)=><a className="tool-link" href={toolsSite+path} target="_blank" rel="noreferrer" key={title}><span className="tool-number">0{index+1}</span><span><strong>{title}</strong><small>{text}</small></span><b>↗</b></a>)}
+        {tools.map(([title,text,path],index)=><a className="tool-link" href={path} target="_blank" rel="noreferrer" key={title}><span className="tool-number">0{index+1}</span><span><strong>{title}</strong><small>{text}</small></span><b>↗</b></a>)}
         <details className="nut-dropdown">
           <summary><span className="tool-number">03</span><span><strong>Nut Spacing Guide</strong><small>Choose a printable instrument template.</small></span><b>⌄</b></summary>
           <div className="template-menu">{nutGuides.map(([title,file])=><a href={`/nut-spacing-guides/${file}.pdf`} download key={file}><span>{title}</span><b>PDF ↓</b></a>)}</div>
