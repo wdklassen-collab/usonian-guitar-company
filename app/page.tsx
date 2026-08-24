@@ -8,7 +8,7 @@ const products = [
 ];
 const tools = [
   ["Fretboard Generator", "Lay out, save, print, and export custom fretboards.", "/fretboard-generator/"],
-  ["Radius Dish Creator", "Generate STL and CNC toolpaths for radius dishes.", `${toolsSite}radius-dish/`],
+  ["Radius Dish Creator", "Generate STL and CNC toolpaths for radius dishes.", "/radiusdishcreator/"],
 ];
 const nutGuides = [
   ["Steel-string guitar", "usonian_steel_string_guitar_nut_spacing_guide"],
