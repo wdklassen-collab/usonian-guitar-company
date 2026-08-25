@@ -69,6 +69,18 @@ nav a:hover{color:var(--copper)}
 .text-link{display:inline-block;margin-top:35px;text-decoration:none;font-weight:800;border-bottom:1px solid var(--copper);padding-bottom:5px}
 .text-link span{color:var(--copper);margin-left:8px}
 
+.products-services .section-heading h1{font-family:var(--display);font-size:clamp(3rem,6vw,5.6rem);font-weight:500;line-height:.95;letter-spacing:-.04em;margin:0}
+.products-services .product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;border:0}
+.products-services .product-card{position:relative;padding:34px 34px 38px;border:1px solid var(--line);background:#fffaf1;box-shadow:0 8px 24px rgba(61,40,27,.045)}
+.products-services .product-card::before{content:"";position:absolute;top:0;left:0;width:58px;height:4px;background:var(--copper)}
+.products-services .product-card>span{display:block;margin-bottom:24px;font-size:.8rem;letter-spacing:.16em}
+.products-services .product-card h2{font:600 clamp(1.55rem,2.5vw,2.15rem)/1.12 var(--display);letter-spacing:-.02em;margin:0 0 14px;color:var(--walnut)}
+.products-services .product-card>p{margin:0 0 24px;max-width:640px}
+.products-services .product-card ul{list-style:none;margin:0;padding:20px 0 0;border-top:1px solid #e3d9c9;display:grid;gap:11px}
+.products-services .product-card li{position:relative;padding-left:22px;color:#51463c;line-height:1.5}
+.products-services .product-card li::before{content:"";position:absolute;left:2px;top:.58em;width:8px;height:8px;background:var(--copper);transform:rotate(45deg)}
+.products-services .product-card:nth-child(4n+2),.products-services .product-card:nth-child(4n+3){background:var(--cream)}
+
 .tools-section{padding:clamp(70px,9vw,120px) clamp(24px,8vw,120px);background:var(--walnut);color:var(--cream)}
 .section-heading.light>p:last-child{color:#d2c4b0}
 .section-heading.light .eyebrow{color:#df8656}
@@ -117,6 +129,8 @@ footer small{grid-column:1/-1;color:#8f8375;border-top:1px solid #44382f;padding
 .product-grid{grid-template-columns:1fr}
 .product-card{border-right:0;border-bottom:1px solid var(--line)}
 .product-card:last-child{border-bottom:0}
+.products-services .product-grid{grid-template-columns:1fr;gap:16px}
+.products-services .product-card{border:1px solid var(--line)}
 .about-mark{max-width:330px}
 .about{gap:50px}
 footer{grid-template-columns:1fr}
@@ -141,4 +155,6 @@ footer small{grid-column:auto}
 .tool-list strong{font-size:1.25rem}
 .tool-list small{line-height:1.4}
 .template-menu{padding-left:52px}
+.products-services .product-card{padding:28px 24px 30px}
+.products-services .product-card h2{font-size:1.55rem}
 }
