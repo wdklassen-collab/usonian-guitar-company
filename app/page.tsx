@@ -9,6 +9,7 @@ const products = [
 const tools = [
   ["Fretboard Generator", "Lay out, save, print, and export custom fretboards.", "/fretboard-generator/"],
   ["Radius Dish Creator", "Generate STL and CNC toolpaths for radius dishes.", "/radiusdishcreator/"],
+  ["Neck Template Generator", "Create bolt-on neck side profiles, SVG files, and full-size paper templates.", "/neck-template/"],
 ];
 const nutGuides = [
   ["Steel-string guitar", "usonian_steel_string_guitar_nut_spacing_guide"],
@@ -58,7 +59,7 @@ export default function Home() {
       <div className="tool-list">
         {tools.map(([title,text,path],index)=><a className="tool-link" href={path} target="_blank" rel="noreferrer" key={title}><span className="tool-number">0{index+1}</span><span><strong>{title}</strong><small>{text}</small></span><b>↗</b></a>)}
         <details className="nut-dropdown">
-          <summary><span className="tool-number">03</span><span><strong>Nut Spacing Guide</strong><small>Choose a printable instrument template.</small></span><b>⌄</b></summary>
+          <summary><span className="tool-number">04</span><span><strong>Nut Spacing Guide</strong><small>Choose a printable instrument template.</small></span><b>⌄</b></summary>
           <div className="template-menu">{nutGuides.map(([title,file])=><a href={`/nut-spacing-guides/${file}.pdf`} download key={file}><span>{title}</span><b>PDF ↓</b></a>)}</div>
         </details>
       </div>
