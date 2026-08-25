@@ -1,0 +1,12 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg" aria-labelledby="title desc" role="img">
+  <title id="title">Usonian Guitar Co. shield</title>
+  <desc id="desc">Geometric Usonian shield monogram in copper</desc>
+  <g stroke="#b65f32" stroke-width="9" stroke-linecap="square" stroke-linejoin="miter" fill="none">
+    <path d="M48 24H208V172L128 234L48 172V24Z"/>
+    <rect x="48" y="24" width="29" height="29"/>
+    <rect x="179" y="24" width="29" height="29"/>
+    <path d="M78 54H178V154L128 195L78 154V54Z"/>
+    <path d="M101 76V126C101 152 112 166 128 166C144 166 155 152 155 126V76"/>
+    <path d="M128 195L147 214L128 233L109 214L128 195Z"/>
+  </g>
+</svg>
