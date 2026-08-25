@@ -51,7 +51,7 @@ export default function ProductsServices() {
       <a className="header-shop" href={ebayStore} target="_blank" rel="noreferrer">Shop eBay</a>
     </header>
 
-    <section className="section products">
+    <section className="section products products-services">
       <div className="section-heading">
         <p className="eyebrow">Lutherie tooling · fabrication · prototyping</p>
         <h1>Products & Services</h1>
