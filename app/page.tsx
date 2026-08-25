@@ -68,12 +68,12 @@ export default function Home() {
     </section>
 
     <section className="section about" id="about">
-      <div className="about-mark"><span>UG</span></div>
+      <div className="about-mark"><img src="/usonian-shield.svg" alt="Usonian Guitar Co. shield logo"/></div>
       <div><p className="eyebrow">About Usonian</p><h2>Built from experience, not theory.</h2><p>Usonian Guitar Co. is an independent Colorado workshop creating practical tools for luthiers and guitar builders. Our products grow out of the same process they support: measure carefully, solve the real problem, and keep the design straightforward.</p><p>We believe good tools should make fine work more approachable—not more complicated.</p></div>
     </section>
 
     <section className="contact" id="contact"><p className="eyebrow">Questions or ideas?</p><h2>Let’s talk guitars.</h2><p>Questions about a Usonian tool, a current order, or an idea for something the lutherie community needs?</p><a className="button primary" href="mailto:usonianguitar@outlook.com">usonianguitar@outlook.com</a></section>
 
-    <footer><a className="brand" href="#top"><span className="brand-mark">U</span><span>Usonian Guitar Co.</span></a><p>Independent lutherie tools from Colorado.</p><div><a href={ebayStore} target="_blank" rel="noreferrer">eBay Store</a><a href="/products-services/">Products & Services</a><a href={toolsSite} target="_blank" rel="noreferrer">Web Tools</a></div><small>© {new Date().getFullYear()} Usonian Guitar Co., LLC</small></footer>
+    <footer><a className="brand" href="#top"><img className="brand-mark-image" src="/usonian-shield-diamond.svg" alt="Usonian Guitar Co. shield logo"/><span>Usonian Guitar Co.</span></a><p>Independent lutherie tools from Colorado.</p><div><a href={ebayStore} target="_blank" rel="noreferrer">eBay Store</a><a href="/products-services/">Products & Services</a><a href={toolsSite} target="_blank" rel="noreferrer">Web Tools</a></div><small>© {new Date().getFullYear()} Usonian Guitar Co., LLC</small></footer>
   </main>;
 }
