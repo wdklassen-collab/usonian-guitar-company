@@ -1,0 +1,13 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg" aria-labelledby="title desc" role="img">
+  <title id="title">Usonian Guitar Co. shield diamond badge</title>
+  <desc id="desc">Geometric Usonian shield inside a copper diamond</desc>
+  <g stroke="#b65f32" stroke-width="8" stroke-linecap="square" stroke-linejoin="miter" fill="none">
+    <path d="M128 14L242 128L128 242L14 128L128 14Z"/>
+    <path d="M70 42H186V164L128 214L70 164V42Z"/>
+    <rect x="70" y="42" width="22" height="22"/>
+    <rect x="164" y="42" width="22" height="22"/>
+    <path d="M92 64H164V148L128 179L92 148V64Z"/>
+    <path d="M109 84V126C109 147 118 160 128 160C138 160 147 147 147 126V84"/>
+    <path d="M128 179L143 194L128 209L113 194L128 179Z"/>
+  </g>
+</svg>
