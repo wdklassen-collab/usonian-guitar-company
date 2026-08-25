@@ -24,7 +24,7 @@ export default function Home() {
   return <main>
     <header className="site-header">
       <a className="brand brand-logo" href="#top" aria-label="Usonian Guitar Co. home"><img src="/usonian-wordmark.svg" alt="Usonian Guitar Co."/></a>
-      <nav aria-label="Primary navigation"><a href="#products">Products</a><a href="#tools">Tools</a><a href="#about">About</a><a href="#contact">Contact</a></nav>
+      <nav aria-label="Primary navigation"><a href="#products">Products</a><a href="/products-services/">Products & Services</a><a href="#tools">Tools</a><a href="#about">About</a><a href="#contact">Contact</a></nav>
       <a className="header-shop" href={ebayStore} target="_blank" rel="noreferrer">Shop eBay</a>
     </header>
 
@@ -33,7 +33,7 @@ export default function Home() {
         <p className="eyebrow">Independent lutherie tools · Colorado</p>
         <h1>Better tools for<br/><em>better guitars.</em></h1>
         <p className="hero-intro">Practical jigs, templates, and digital tools developed at the workbench for acoustic-guitar builders.</p>
-        <div className="hero-actions"><a className="button primary" href={ebayStore} target="_blank" rel="noreferrer">Shop Usonian Tools</a><a className="button secondary" href="#tools">Explore Free Tools</a></div>
+        <div className="hero-actions"><a className="button primary" href={ebayStore} target="_blank" rel="noreferrer">Shop Usonian Tools</a><a className="button secondary" href="/products-services/">Products & Services</a><a className="button secondary" href="#tools">Explore Free Tools</a></div>
       </div>
       <div className="hero-art" aria-label="Prairie-style geometric guitar design">
         <div className="prairie-frame"/>
@@ -52,7 +52,8 @@ export default function Home() {
     <section className="section products" id="products">
       <div className="section-heading"><p className="eyebrow">At the workbench</p><h2>Lutherie tools without the fuss.</h2><p>Each Usonian product begins with a real building problem and is refined for repeatable use.</p></div>
       <div className="product-grid">{products.map(([number,title,text])=><article className="product-card" key={number}><span>{number}</span><h3>{title}</h3><p>{text}</p></article>)}</div>
-      <a className="text-link" href={ebayStore} target="_blank" rel="noreferrer">View all available products on eBay <span>→</span></a>
+      <a className="text-link" href="/products-services/">Explore all products & services <span>→</span></a>
+      <a className="text-link" href={ebayStore} target="_blank" rel="noreferrer">View available products on eBay <span>→</span></a>
     </section>
 
     <section className="tools-section" id="tools">
@@ -73,6 +74,6 @@ export default function Home() {
 
     <section className="contact" id="contact"><p className="eyebrow">Questions or ideas?</p><h2>Let’s talk guitars.</h2><p>Questions about a Usonian tool, a current order, or an idea for something the lutherie community needs?</p><a className="button primary" href="mailto:usonianguitar@outlook.com">usonianguitar@outlook.com</a></section>
 
-    <footer><a className="brand" href="#top"><span className="brand-mark">U</span><span>Usonian Guitar Co.</span></a><p>Independent lutherie tools from Colorado.</p><div><a href={ebayStore} target="_blank" rel="noreferrer">eBay Store</a><a href={toolsSite} target="_blank" rel="noreferrer">Web Tools</a></div><small>© {new Date().getFullYear()} Usonian Guitar Co., LLC</small></footer>
+    <footer><a className="brand" href="#top"><span className="brand-mark">U</span><span>Usonian Guitar Co.</span></a><p>Independent lutherie tools from Colorado.</p><div><a href={ebayStore} target="_blank" rel="noreferrer">eBay Store</a><a href="/products-services/">Products & Services</a><a href={toolsSite} target="_blank" rel="noreferrer">Web Tools</a></div><small>© {new Date().getFullYear()} Usonian Guitar Co., LLC</small></footer>
   </main>;
 }
