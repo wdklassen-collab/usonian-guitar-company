@@ -69,7 +69,7 @@ export default function ProductsServices() {
     </section>
 
     <section className="section about">
-      <div className="about-mark"><span>UG</span></div>
+      <div className="about-mark"><img src="/usonian-shield.svg" alt="Usonian Guitar Co. shield logo"/></div>
       <div>
         <p className="eyebrow">Custom design & prototyping</p>
         <h2>Have an idea? We can help turn it into a tool.</h2>
@@ -85,6 +85,6 @@ export default function ProductsServices() {
       <a className="button primary" href="mailto:usonianguitar@outlook.com?subject=Custom%20Tool%20Request">Start a Custom Project</a>
     </section>
 
-    <footer><a className="brand" href="/"><span className="brand-mark">U</span><span>Usonian Guitar Co.</span></a><p>Independent lutherie tools from Colorado.</p><div><a href={ebayStore} target="_blank" rel="noreferrer">eBay Store</a><a href="/">Home</a></div><small>© {new Date().getFullYear()} Usonian Guitar Co., LLC</small></footer>
+    <footer><a className="brand" href="/"><img className="brand-mark-image" src="/usonian-shield-diamond.svg" alt="Usonian Guitar Co. shield logo"/><span>Usonian Guitar Co.</span></a><p>Independent lutherie tools from Colorado.</p><div><a href={ebayStore} target="_blank" rel="noreferrer">eBay Store</a><a href="/">Home</a></div><small>© {new Date().getFullYear()} Usonian Guitar Co., LLC</small></footer>
   </main>;
 }
