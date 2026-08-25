@@ -6,6 +6,7 @@ const products = [
   ["02", "Headstock Templates", "Modular drilling and slotting guides designed to make repeatable headstock work easier in a small shop."],
   ["03", "Rosette & Layout Tools", "Practical fixtures and marking aids for accurate, repeatable acoustic-guitar construction."],
 ];
+// Every entry must have a matching app/<route>/route.ts; enforced by tests/tool-routes.test.mjs.
 const tools = [
   ["Fretboard Generator", "Lay out, save, print, and export custom fretboards.", "/fretboard-generator/"],
   ["Radius Dish Creator", "Generate STL and CNC toolpaths for radius dishes.", "/radiusdishcreator/"],
