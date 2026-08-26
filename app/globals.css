@@ -9,8 +9,8 @@ a{color:inherit}
 .site-header{height:82px;display:flex;align-items:center;gap:30px;padding:0 clamp(20px,5vw,72px);border-bottom:1px solid var(--line);background:rgba(251,247,238,.96);position:sticky;top:0;z-index:10}
 
 .brand{display:flex;align-items:center;gap:11px;text-decoration:none;font-family:Georgia,serif;font-weight:700;letter-spacing:.02em;white-space:nowrap}
-.brand-mark{width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--copper);color:var(--copper);font-family:Georgia,serif;transform:rotate(45deg)}
-.brand-mark+span{font-size:1.05rem}
+.brand-mark-image{width:38px;height:38px;display:block;flex:0 0 auto}
+.brand-mark-image+span{font-size:1.05rem}
 
 .brand-logo{display:block;width:260px;height:72px}
 .brand-logo img{display:block;width:100%;height:100%;object-fit:contain;object-position:left center}
@@ -100,10 +100,10 @@ nav a:hover{color:var(--copper)}
 .template-menu a b{font-size:.68rem;letter-spacing:.12em}
 
 .about{display:grid;grid-template-columns:.8fr 1.2fr;gap:clamp(50px,10vw,150px);align-items:center}
-.about-mark{aspect-ratio:1;max-width:430px;background:var(--cream);display:grid;place-items:center;position:relative}
+.about-mark{aspect-ratio:1;max-width:430px;background:var(--cream);display:grid;place-items:center;position:relative;padding:34px}
 .about-mark::before,.about-mark::after{content:"";position:absolute;inset:17%;border:1px solid var(--copper);transform:rotate(45deg)}
 .about-mark::after{inset:30%;border-color:var(--sage)}
-.about-mark span{font:700 clamp(3rem,7vw,6rem) var(--display);color:var(--walnut);z-index:2}
+.about-mark img{width:min(72%,280px);height:auto;display:block;position:relative;z-index:2}
 .about h2{margin-bottom:30px}
 .about>div:last-child>p:not(.eyebrow){font:1.05rem/1.8 var(--sans);color:#62574d;max-width:660px}
 
@@ -139,7 +139,8 @@ footer small{grid-column:auto}
 
 @media(max-width:520px){.site-header{height:70px;padding:0 12px}
 .brand-logo{width:190px;height:56px}
-.brand-mark+span{font-size:.9rem}
+.brand-mark-image{width:34px;height:34px}
+.brand-mark-image+span{font-size:.9rem}
 .header-shop{padding:9px 8px;font-size:.65rem}
 .hero-copy{padding:70px 22px}
 .hero h1{font-size:3.5rem}
