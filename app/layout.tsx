@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./about-logo-fix.css";
 
 export const metadata: Metadata = {
   title: "Usonian Guitar Co. | Tools for Guitar Builders",
