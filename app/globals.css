@@ -79,7 +79,6 @@ nav a:hover{color:var(--copper)}
 .products-services .product-card ul{list-style:none;margin:0;padding:20px 0 0;border-top:1px solid #e3d9c9;display:grid;gap:11px}
 .products-services .product-card li{position:relative;padding-left:22px;color:#51463c;line-height:1.5}
 .products-services .product-card li::before{content:"";position:absolute;left:2px;top:.58em;width:8px;height:8px;background:var(--copper);transform:rotate(45deg)}
-.products-services .product-card:nth-child(4n+2),.products-services .product-card:nth-child(4n+3){background:var(--cream)}
 
 .tools-section{padding:clamp(70px,9vw,120px) clamp(24px,8vw,120px);background:var(--walnut);color:var(--cream)}
 .section-heading.light>p:last-child{color:#d2c4b0}
