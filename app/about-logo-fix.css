@@ -1,0 +1,3 @@
+.about-mark::after{content:none!important}
+.about-mark::before{content:"";position:absolute;inset:14%;border:1px solid var(--copper);transform:rotate(45deg)}
+.about-mark img{width:min(68%,260px);height:auto;display:block;position:relative;z-index:2;margin:auto}
