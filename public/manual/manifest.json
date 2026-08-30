@@ -3,10 +3,10 @@
   "files": [
     {"id":"toc","title":"Table of Contents","filename":"Usonian_OM14_Table_of_Contents_LOCKED.md","status":"LOCKED","revision":"A"},
     {"id":"ch1","title":"Chapter 1 — Materials, Specifications & Component Tables","filename":"Usonian_OM14_Chapter1_LOCKED.md","status":"LOCKED","revision":"B"},
-    {"id":"ch2","title":"Chapter 2 — Workshop, Tools & Jigs","filename":"Usonian_OM14_Chapter2_RevB_LOCKED.md","status":"READY TO IMPORT","revision":"B","source":"https://docs.google.com/document/d/1ODPxmcTTDi4UmYJH5eTPRYfvibmeKUlAUzmEof-6LkQ/edit"},
-    {"id":"ch3","title":"Chapter 3 — Wood Selection & Preparation","filename":"Usonian_OM14_Chapter3_RevB_LOCKED.md","status":"READY TO IMPORT","revision":"B","source":"https://docs.google.com/document/d/1fD9zvDQNKNsWA8sPOgEu14dC0x6ZnkOCd46TdvIZdCM/edit"},
-    {"id":"ch4","title":"Chapter 4 — Body Geometry & Layout","filename":"Usonian_OM14_Chapter4_RevB_WORKING.md","status":"READY TO IMPORT","revision":"B","source":"https://docs.google.com/document/d/1-6r_UJFVzxnDCRmREwf7BlHB8j-M4QQ2OwZg-jzfFag/edit"},
-    {"id":"ch5","title":"Chapter 5 — Building the Rim Assembly","filename":"Usonian_OM14_Chapter5_WORKING.md","status":"READY TO IMPORT","source":"https://docs.google.com/document/d/1rI405_qR8tRtNKKd9Keopokr9eAtO90zFyTidYbE5cA/edit"},
-    {"id":"ch6","title":"Chapter 6 — Back Construction","filename":"Usonian_OM14_Chapter6_RevA_WORKING.md","status":"READY TO IMPORT","revision":"A","source":"https://docs.google.com/document/d/1H0Esl6cKl2Pgrm9wpGjTJjgyNh_y8t-YKBs5juFyHhw/edit"}
+    {"id":"ch2","title":"Chapter 2 — Workshop, Tools & Jigs","filename":"Usonian_OM14_Chapter2_RevB_LOCKED.md","status":"LOCKED","revision":"B","source":"https://docs.google.com/document/d/1ODPxmcTTDi4UmYJH5eTPRYfvibmeKUlAUzmEof-6LkQ/edit"},
+    {"id":"ch3","title":"Chapter 3 — Wood Selection & Preparation","filename":"Usonian_OM14_Chapter3_RevB_LOCKED.md","status":"LOCKED","revision":"B","source":"https://docs.google.com/document/d/1fD9zvDQNKNsWA8sPOgEu14dC0x6ZnkOCd46TdvIZdCM/edit"},
+    {"id":"ch4","title":"Chapter 4 — Body Geometry & Layout","filename":"Usonian_OM14_Chapter4_RevB_WORKING.md","status":"WORKING","revision":"B","source":"https://docs.google.com/document/d/1-6r_UJFVzxnDCRmREwf7BlHB8j-M4QQ2OwZg-jzfFag/edit"},
+    {"id":"ch5","title":"Chapter 5 — Building the Rim Assembly","filename":"Usonian_OM14_Chapter5_WORKING.md","status":"WORKING","source":"https://docs.google.com/document/d/1rI405_qR8tRtNKKd9Keopokr9eAtO90zFyTidYbE5cA/edit"},
+    {"id":"ch6","title":"Chapter 6 — Back Construction","filename":"Usonian_OM14_Chapter6_RevA_WORKING.md","status":"WORKING","revision":"A","source":"https://docs.google.com/document/d/1H0Esl6cKl2Pgrm9wpGjTJjgyNh_y8t-YKBs5juFyHhw/edit"}
   ]
 }
