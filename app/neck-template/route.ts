@@ -1,4 +1,4 @@
-const SOURCE = "https://raw.githubusercontent.com/wdklassen-collab/usonian-web-tools/main/neck-template/index.html";
+const SOURCE = "https://raw.githubusercontent.com/wdklassen-collab/usonian-guitar-company/main/neck-template/index.html";
 
 export async function GET() {
   const response = await fetch(SOURCE, { cache: "no-store" });
