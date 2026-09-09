@@ -53,7 +53,6 @@
     setInput(def.pos,Math.max(b[0],Math.min(b[1],value)));
   }
   function setWidth(def,value){
-    const p=params(); if(!p) return;
     const v=Math.max(40,Math.min(600,value));
     setInput(def.width,v);
   }
@@ -73,7 +72,6 @@
       const x=p[def.pos];
       const half=p[def.width]/2;
       const yTop=-half;
-      const yBottom=half;
 
       const posGroup=document.createElementNS(svgNS,'g');
       posGroup.setAttribute('data-usonian-handle',def.key+'-pos');
@@ -94,21 +92,20 @@
       widthGroup.setAttribute('data-usonian-handle',def.key+'-width');
 
       const guide=document.createElementNS(svgNS,'line');
-      guide.setAttribute('x1',x); guide.setAttribute('x2',x); guide.setAttribute('y1',yTop); guide.setAttribute('y2',yBottom);
+      guide.setAttribute('x1',x); guide.setAttribute('x2',x); guide.setAttribute('y1',yTop); guide.setAttribute('y2','0');
       guide.setAttribute('stroke','#2f6fb0'); guide.setAttribute('stroke-width','0.8'); guide.setAttribute('stroke-dasharray','3 3');
       guide.style.pointerEvents='none';
 
-      [yTop,yBottom].forEach((y,idx)=>{
-        const halo=document.createElementNS(svgNS,'circle');
-        halo.setAttribute('cx',x); halo.setAttribute('cy',y); halo.setAttribute('r','13'); halo.setAttribute('fill','transparent');
-        halo.style.touchAction='none'; halo.style.cursor='ns-resize';
-        halo.addEventListener('pointerdown',e=>{e.preventDefault();active={kind:'width',def,pointerId:e.pointerId};});
-        const c=document.createElementNS(svgNS,'circle');
-        c.setAttribute('cx',x); c.setAttribute('cy',y); c.setAttribute('r','6.5'); c.setAttribute('fill','#fff');
-        c.setAttribute('stroke','#2f6fb0'); c.setAttribute('stroke-width','2'); c.style.pointerEvents='none';
-        widthGroup.appendChild(halo); widthGroup.appendChild(c);
-      });
-      widthGroup.insertBefore(guide,widthGroup.firstChild);
+      const halo=document.createElementNS(svgNS,'circle');
+      halo.setAttribute('cx',x); halo.setAttribute('cy',yTop); halo.setAttribute('r','13'); halo.setAttribute('fill','transparent');
+      halo.style.touchAction='none'; halo.style.cursor='ns-resize';
+      halo.addEventListener('pointerdown',e=>{e.preventDefault();active={kind:'width',def,pointerId:e.pointerId};});
+
+      const c=document.createElementNS(svgNS,'circle');
+      c.setAttribute('cx',x); c.setAttribute('cy',yTop); c.setAttribute('r','6.5'); c.setAttribute('fill','#fff');
+      c.setAttribute('stroke','#2f6fb0'); c.setAttribute('stroke-width','2'); c.style.pointerEvents='none';
+
+      widthGroup.append(guide,halo,c);
       svg.appendChild(widthGroup);
     });
   }
