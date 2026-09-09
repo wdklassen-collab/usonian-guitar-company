@@ -1,10 +1,12 @@
 const SOURCE = "https://raw.githubusercontent.com/wdklassen-collab/usonian-guitar-company/main/side-template/index.html";
 const OM_CURVES = "https://raw.githubusercontent.com/wdklassen-collab/usonian-guitar-company/main/side-template/om-curves.js";
+const OM_DEFAULTS = "https://raw.githubusercontent.com/wdklassen-collab/usonian-guitar-company/main/side-template/defaults.js";
 
 export async function GET() {
-  const [htmlResponse, curveResponse] = await Promise.all([
+  const [htmlResponse, curveResponse, defaultsResponse] = await Promise.all([
     fetch(SOURCE, { cache: "no-store" }),
     fetch(OM_CURVES, { cache: "no-store" }),
+    fetch(OM_DEFAULTS, { cache: "no-store" }),
   ]);
 
   if (!htmlResponse.ok) {
@@ -15,16 +17,17 @@ export async function GET() {
   }
 
   let html = await htmlResponse.text();
+  const scripts: string[] = [];
 
-  if (curveResponse.ok) {
-    const curves = await curveResponse.text();
-    const closingBody = html.lastIndexOf("</body>");
-    if (closingBody !== -1) {
-      html =
-        html.slice(0, closingBody) +
-        `<script>${curves}</script>` +
-        html.slice(closingBody);
-    }
+  if (curveResponse.ok) scripts.push(await curveResponse.text());
+  if (defaultsResponse.ok) scripts.push(await defaultsResponse.text());
+
+  const closingBody = html.lastIndexOf("</body>");
+  if (closingBody !== -1 && scripts.length) {
+    html =
+      html.slice(0, closingBody) +
+      scripts.map((script) => `<script>${script}</script>`).join("") +
+      html.slice(closingBody);
   }
 
   return new Response(html, {
