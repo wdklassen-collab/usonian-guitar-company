@@ -1,23 +1,13 @@
-/* OM outline override + persistent draggable bout-position handles. */
+/* OM outline override + draggable position and mirrored width handles. */
 (function(){
-  function smoothstep(t){
-    t=Math.max(0,Math.min(1,t));
-    return t*t*(3-2*t);
-  }
-
+  function smoothstep(t){t=Math.max(0,Math.min(1,t));return t*t*(3-2*t);}
   function segment(x,x0,x1,y0,y1,shape){
     if(x1<=x0) return y1;
-    let t=(x-x0)/(x1-x0);
-    t=Math.max(0,Math.min(1,t));
-
+    let t=(x-x0)/(x1-x0); t=Math.max(0,Math.min(1,t));
     let u;
-    if(shape==='neck'){
-      u=Math.sqrt(Math.max(0,1-(1-t)*(1-t)));
-    } else if(shape==='tail'){
-      u=1-Math.sqrt(Math.max(0,1-t*t));
-    } else {
-      u=smoothstep(t);
-    }
+    if(shape==='neck') u=Math.sqrt(Math.max(0,1-(1-t)*(1-t)));
+    else if(shape==='tail') u=1-Math.sqrt(Math.max(0,1-t*t));
+    else u=smoothstep(t);
     return y0+(y1-y0)*u;
   }
 
@@ -27,13 +17,7 @@
     const x2=Math.max(x1+1,Math.min(p.bodyLength-2,p.waistPos));
     const x3=Math.max(x2+1,Math.min(p.bodyLength-1,p.lowerBoutPos));
     const x4=p.bodyLength;
-
-    const y0=p.neckBlockWidth;
-    const y1=p.upperBoutWidth;
-    const y2=p.waistWidth;
-    const y3=p.lowerBoutWidth;
-    const y4=p.tailBlockWidth;
-
+    const y0=p.neckBlockWidth,y1=p.upperBoutWidth,y2=p.waistWidth,y3=p.lowerBoutWidth,y4=p.tailBlockWidth;
     return function(x){
       x=Math.max(0,Math.min(p.bodyLength,x));
       if(x<=x1) return segment(x,x0,x1,y0,y1,'neck');
@@ -43,159 +27,115 @@
     };
   };
 
-  const handleDefs=[
-    {key:'upper', input:'upperBoutPos', label:'Upper bout'},
-    {key:'waist', input:'waistPos', label:'Waist'},
-    {key:'lower', input:'lowerBoutPos', label:'Lower bout'}
+  const stations=[
+    {key:'upper',pos:'upperBoutPos',width:'upperBoutWidth',label:'Upper bout'},
+    {key:'waist',pos:'waistPos',width:'waistWidth',label:'Waist'},
+    {key:'lower',pos:'lowerBoutPos',width:'lowerBoutWidth',label:'Lower bout'}
   ];
-
-  let activeHandle=null;
   const svgNS='http://www.w3.org/2000/svg';
+  let active=null;
 
-  function currentParams(){
-    return typeof readInputs==='function' ? readInputs() : null;
-  }
-
-  function positionBounds(key,p){
+  function params(){return typeof readInputs==='function'?readInputs():null;}
+  function posBounds(key,p){
     const gap=20;
-    if(key==='upper') return [gap, Math.max(gap,p.waistPos-gap)];
-    if(key==='waist') return [p.upperBoutPos+gap, Math.max(p.upperBoutPos+gap,p.lowerBoutPos-gap)];
-    return [p.waistPos+gap, Math.max(p.waistPos+gap,p.bodyLength-gap)];
+    if(key==='upper') return [gap,Math.max(gap,p.waistPos-gap)];
+    if(key==='waist') return [p.upperBoutPos+gap,Math.max(p.upperBoutPos+gap,p.lowerBoutPos-gap)];
+    return [p.waistPos+gap,Math.max(p.waistPos+gap,p.bodyLength-gap)];
+  }
+  function setInput(id,value){
+    const el=document.getElementById(id); if(!el) return;
+    el.value=value.toFixed(1);
+    el.dispatchEvent(new Event('input',{bubbles:true}));
+  }
+  function setPos(def,value){
+    const p=params(); if(!p) return;
+    const b=posBounds(def.key,p);
+    setInput(def.pos,Math.max(b[0],Math.min(b[1],value)));
+  }
+  function setWidth(def,value){
+    const p=params(); if(!p) return;
+    const v=Math.max(40,Math.min(600,value));
+    setInput(def.width,v);
+  }
+  function clientToSvg(svg,x,y){
+    const ctm=svg.getScreenCTM(); if(!ctm) return null;
+    const pt=svg.createSVGPoint(); pt.x=x; pt.y=y;
+    return pt.matrixTransform(ctm.inverse());
   }
 
-  function setPosition(def,value){
-    const p=currentParams();
-    if(!p) return;
-    const bounds=positionBounds(def.key,p);
-    value=Math.max(bounds[0],Math.min(bounds[1],value));
-    const input=document.getElementById(def.input);
-    if(!input) return;
-    input.value=value.toFixed(1);
-    input.dispatchEvent(new Event('input',{bubbles:true}));
-  }
-
-  function clientXToSvgX(svg,clientX,clientY){
-    const ctm=svg.getScreenCTM();
-    if(!ctm) return null;
-    const pt=svg.createSVGPoint();
-    pt.x=clientX;
-    pt.y=clientY;
-    return pt.matrixTransform(ctm.inverse()).x;
-  }
-
-  function decorateTopView(){
+  function decorate(){
     const svg=document.querySelector('svg[aria-label="Top view"]');
     if(!svg) return;
+    svg.querySelectorAll('[data-usonian-handle]').forEach(n=>n.remove());
+    const p=params(); if(!p) return;
 
-    svg.querySelectorAll('[data-bout-handle]').forEach(n=>n.remove());
+    stations.forEach(def=>{
+      const x=p[def.pos];
+      const half=p[def.width]/2;
+      const yTop=-half;
+      const yBottom=half;
 
-    const p=currentParams();
-    if(!p) return;
+      const posGroup=document.createElementNS(svgNS,'g');
+      posGroup.setAttribute('data-usonian-handle',def.key+'-pos');
+      const posHalo=document.createElementNS(svgNS,'circle');
+      posHalo.setAttribute('cx',x); posHalo.setAttribute('cy','0'); posHalo.setAttribute('r','13');
+      posHalo.setAttribute('fill','transparent'); posHalo.style.touchAction='none'; posHalo.style.cursor='ew-resize';
+      const posCircle=document.createElementNS(svgNS,'circle');
+      posCircle.setAttribute('cx',x); posCircle.setAttribute('cy','0'); posCircle.setAttribute('r','6.5');
+      posCircle.setAttribute('fill','#fff'); posCircle.setAttribute('stroke','#9b5f36'); posCircle.setAttribute('stroke-width','2');
+      posCircle.style.pointerEvents='none';
+      const posGrip=document.createElementNS(svgNS,'path');
+      posGrip.setAttribute('d',`M ${x-3.2} -2.5 L ${x+3.2} -2.5 M ${x-3.2} 2.5 L ${x+3.2} 2.5`);
+      posGrip.setAttribute('stroke','#9b5f36'); posGrip.setAttribute('stroke-width','1.2'); posGrip.setAttribute('fill','none'); posGrip.style.pointerEvents='none';
+      posHalo.addEventListener('pointerdown',e=>{e.preventDefault();active={kind:'pos',def,pointerId:e.pointerId};});
+      posGroup.append(posHalo,posCircle,posGrip); svg.appendChild(posGroup);
 
-    handleDefs.forEach(def=>{
-      const x=p[def.input];
-      const y=0;
-      const bounds=positionBounds(def.key,p);
+      const widthGroup=document.createElementNS(svgNS,'g');
+      widthGroup.setAttribute('data-usonian-handle',def.key+'-width');
 
-      const g=document.createElementNS(svgNS,'g');
-      g.setAttribute('data-bout-handle',def.key);
+      const guide=document.createElementNS(svgNS,'line');
+      guide.setAttribute('x1',x); guide.setAttribute('x2',x); guide.setAttribute('y1',yTop); guide.setAttribute('y2',yBottom);
+      guide.setAttribute('stroke','#2f6fb0'); guide.setAttribute('stroke-width','0.8'); guide.setAttribute('stroke-dasharray','3 3');
+      guide.style.pointerEvents='none';
 
-      const halo=document.createElementNS(svgNS,'circle');
-      halo.setAttribute('cx',x);
-      halo.setAttribute('cy',y);
-      halo.setAttribute('r','13');
-      halo.setAttribute('fill','transparent');
-      halo.style.cursor='ew-resize';
-      halo.style.touchAction='none';
-      halo.setAttribute('role','slider');
-      halo.setAttribute('tabindex','0');
-      halo.setAttribute('aria-label',def.label+' position');
-      halo.setAttribute('aria-valuenow',x.toFixed(1));
-      halo.setAttribute('aria-valuemin',bounds[0].toFixed(1));
-      halo.setAttribute('aria-valuemax',bounds[1].toFixed(1));
-
-      const circle=document.createElementNS(svgNS,'circle');
-      circle.setAttribute('cx',x);
-      circle.setAttribute('cy',y);
-      circle.setAttribute('r','6.5');
-      circle.setAttribute('fill','#ffffff');
-      circle.setAttribute('stroke','#9b5f36');
-      circle.setAttribute('stroke-width','2');
-      circle.style.pointerEvents='none';
-
-      const grip=document.createElementNS(svgNS,'path');
-      grip.setAttribute('d',`M ${x-3.2} ${y-2.5} L ${x+3.2} ${y-2.5} M ${x-3.2} ${y+2.5} L ${x+3.2} ${y+2.5}`);
-      grip.setAttribute('stroke','#9b5f36');
-      grip.setAttribute('stroke-width','1.2');
-      grip.setAttribute('fill','none');
-      grip.style.pointerEvents='none';
-
-      halo.addEventListener('pointerdown',e=>{
-        e.preventDefault();
-        activeHandle={def,pointerId:e.pointerId};
-        if(halo.setPointerCapture){
-          try{ halo.setPointerCapture(e.pointerId); }catch(_e){}
-        }
+      [yTop,yBottom].forEach((y,idx)=>{
+        const halo=document.createElementNS(svgNS,'circle');
+        halo.setAttribute('cx',x); halo.setAttribute('cy',y); halo.setAttribute('r','13'); halo.setAttribute('fill','transparent');
+        halo.style.touchAction='none'; halo.style.cursor='ns-resize';
+        halo.addEventListener('pointerdown',e=>{e.preventDefault();active={kind:'width',def,pointerId:e.pointerId};});
+        const c=document.createElementNS(svgNS,'circle');
+        c.setAttribute('cx',x); c.setAttribute('cy',y); c.setAttribute('r','6.5'); c.setAttribute('fill','#fff');
+        c.setAttribute('stroke','#2f6fb0'); c.setAttribute('stroke-width','2'); c.style.pointerEvents='none';
+        widthGroup.appendChild(halo); widthGroup.appendChild(c);
       });
-
-      halo.addEventListener('keydown',e=>{
-        if(e.key!=='ArrowLeft' && e.key!=='ArrowRight') return;
-        e.preventDefault();
-        const latest=currentParams();
-        if(!latest) return;
-        const step=e.shiftKey?5:1;
-        const dir=e.key==='ArrowLeft'?-1:1;
-        setPosition(def,latest[def.input]+dir*step);
-      });
-
-      g.appendChild(halo);
-      g.appendChild(circle);
-      g.appendChild(grip);
-      svg.appendChild(g);
+      widthGroup.insertBefore(guide,widthGroup.firstChild);
+      svg.appendChild(widthGroup);
     });
   }
 
   window.addEventListener('pointermove',e=>{
-    if(!activeHandle || e.pointerId!==activeHandle.pointerId) return;
-    const svg=document.querySelector('svg[aria-label="Top view"]');
-    if(!svg) return;
-    const x=clientXToSvgX(svg,e.clientX,e.clientY);
-    if(x==null) return;
+    if(!active||e.pointerId!==active.pointerId) return;
+    const svg=document.querySelector('svg[aria-label="Top view"]'); if(!svg) return;
+    const pt=clientToSvg(svg,e.clientX,e.clientY); if(!pt) return;
     e.preventDefault();
-    setPosition(activeHandle.def,x);
+    if(active.kind==='pos') setPos(active.def,pt.x);
+    else setWidth(active.def,Math.abs(pt.y)*2);
   },{passive:false});
-
-  function endDrag(e){
-    if(!activeHandle) return;
-    if(e && e.pointerId!==undefined && e.pointerId!==activeHandle.pointerId) return;
-    activeHandle=null;
-  }
-  window.addEventListener('pointerup',endDrag);
-  window.addEventListener('pointercancel',endDrag);
+  window.addEventListener('pointerup',e=>{if(active&&e.pointerId===active.pointerId) active=null;});
+  window.addEventListener('pointercancel',()=>{active=null;});
 
   const canvas=document.getElementById('canvas');
-  if(canvas && !canvas.__usonianHandleObserver){
+  if(canvas&&!canvas.__usonianHandleObserver){
     let scheduled=false;
     const observer=new MutationObserver(()=>{
-      if(scheduled) return;
-      scheduled=true;
-      requestAnimationFrame(()=>{
-        scheduled=false;
-        decorateTopView();
-      });
+      if(scheduled) return; scheduled=true;
+      requestAnimationFrame(()=>{scheduled=false;decorate();});
     });
     observer.observe(canvas,{childList:true,subtree:false});
     canvas.__usonianHandleObserver=observer;
   }
 
-  /* The base page performs its first render before this override script is injected.
-     Force a fresh render now that the OM geometry is installed, then decorate it.
-     A second animation-frame render avoids an iOS/Safari startup timing race. */
-  function renderCorrectGeometry(){
-    if(typeof window.render==='function') window.render();
-    decorateTopView();
-  }
-
-  renderCorrectGeometry();
-  requestAnimationFrame(()=>requestAnimationFrame(renderCorrectGeometry));
+  function renderCorrect(){if(typeof window.render==='function') window.render();decorate();}
+  renderCorrect();
+  requestAnimationFrame(()=>requestAnimationFrame(renderCorrect));
 })();
