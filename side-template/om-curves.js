@@ -35,6 +35,23 @@
   const svgNS='http://www.w3.org/2000/svg';
   let active=null;
 
+  const omDefaults={
+    bodyLength:485.8,
+    backRadius:4572,
+    neckDepth:79.3,
+    tailDepth:104.5,
+    neckExtension:15,
+    tailExtension:15,
+    neckBlockWidth:63.5,
+    tailBlockWidth:63.5,
+    upperBoutWidth:288.7,
+    upperBoutPos:103.4,
+    waistWidth:234.3,
+    waistPos:204.5,
+    lowerBoutWidth:381.1,
+    lowerBoutPos:355.6
+  };
+
   function params(){return typeof readInputs==='function'?readInputs():null;}
   function posBounds(key,p){
     const gap=20;
@@ -46,6 +63,14 @@
     const el=document.getElementById(id); if(!el) return;
     el.value=value.toFixed(1);
     el.dispatchEvent(new Event('input',{bubbles:true}));
+  }
+  function applyOmDefaults(){
+    Object.entries(omDefaults).forEach(([id,value])=>{
+      const el=document.getElementById(id);
+      if(el) el.value=String(value);
+    });
+    if(typeof window.render==='function') window.render();
+    decorate();
   }
   function setPos(def,value){
     const p=params(); if(!p) return;
@@ -132,7 +157,9 @@
     canvas.__usonianHandleObserver=observer;
   }
 
-  function renderCorrect(){if(typeof window.render==='function') window.render();decorate();}
-  renderCorrect();
-  requestAnimationFrame(()=>requestAnimationFrame(renderCorrect));
+  const resetBtn=document.getElementById('resetBtn');
+  if(resetBtn) resetBtn.addEventListener('click',()=>requestAnimationFrame(applyOmDefaults));
+
+  applyOmDefaults();
+  requestAnimationFrame(()=>requestAnimationFrame(applyOmDefaults));
 })();
