@@ -1,9 +1,17 @@
-/* OM curve tuning + independent lower-bout front and tail radius controls. */
+/* OM curve tuning + 2D lower-bout front and tail curve handles. */
 (function(){
   const DEFAULT_RADIUS=140;
   const MIN_RADIUS=70;
   const MAX_RADIUS=300;
+  const DEFAULT_FRONT_T=0.34;
+  const DEFAULT_TAIL_T=0.58;
+  const MIN_T=0.14;
+  const MAX_T=0.86;
   const svgNS='http://www.w3.org/2000/svg';
+
+  let frontHandleT=DEFAULT_FRONT_T;
+  let tailHandleT=DEFAULT_TAIL_T;
+  let drag=null;
 
   function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
   function clamp01(t){return clamp(t,0,1);}
@@ -20,8 +28,16 @@
     return clamp(0.032+(valueOf('lowerBoutFrontRadius')-DEFAULT_RADIUS)*0.00055,-0.035,0.115);
   }
 
+  function frontSkew(){
+    return clamp((frontHandleT-DEFAULT_FRONT_T)*0.42,-0.11,0.16);
+  }
+
   function tailExponent(){
     return clamp(0.8+valueOf('lowerBoutRadius')/100,1.5,3.8);
+  }
+
+  function tailSkew(){
+    return clamp((tailHandleT-DEFAULT_TAIL_T)*0.34,-0.15,0.10);
   }
 
   function blend(x,x0,x1,y0,y1,shape){
@@ -33,9 +49,12 @@
     }else if(shape==='upper-waist'){
       u=smoothstep(t)-0.022*bump(t);
     }else if(shape==='waist-lower'){
-      u=smoothstep(t)+frontBias()*bump(t);
+      // Radius changes fullness; horizontal handle movement moves where
+      // curvature is concentrated while preserving both end anchors/slopes.
+      u=smoothstep(t)+frontBias()*bump(t)+frontSkew()*bump(t)*(2*t-1);
     }else if(shape==='tail'){
-      u=1-Math.sqrt(Math.max(0,1-Math.pow(t,tailExponent())));
+      const base=1-Math.sqrt(Math.max(0,1-Math.pow(t,tailExponent())));
+      u=base+tailSkew()*bump(t)*(2*t-1);
     }else{
       u=smoothstep(t);
     }
@@ -102,17 +121,25 @@
     return pt.matrixTransform(ctm.inverse());
   }
 
-  let drag=null;
-
-  function setRadius(id,value){
+  function setRadius(id,value,doRender=true){
     const input=document.getElementById(id);
     if(!input) return;
     input.value=String(Math.round(clamp(value,MIN_RADIUS,MAX_RADIUS)));
-    renderAll();
+    if(doRender) renderAll();
+  }
+
+  function handleTFor(id){
+    return id==='lowerBoutFrontRadius'?frontHandleT:tailHandleT;
+  }
+
+  function setHandleT(id,value){
+    if(id==='lowerBoutFrontRadius') frontHandleT=clamp(value,MIN_T,MAX_T);
+    else tailHandleT=clamp(value,MIN_T,MAX_T);
   }
 
   function appendRadiusHandle(svg,p,widthFn,opts){
-    const x=opts.x;
+    const t=handleTFor(opts.id);
+    const x=opts.x0+(opts.x1-opts.x0)*t;
     const y=-widthFn(x)/2;
     const g=document.createElementNS(svgNS,'g');
     g.setAttribute('data-lower-radius-handle',opts.id);
@@ -124,10 +151,10 @@
     guide.setAttribute('stroke-dasharray','3 3'); guide.style.pointerEvents='none';
 
     const halo=document.createElementNS(svgNS,'circle');
-    halo.setAttribute('cx',x); halo.setAttribute('cy',y); halo.setAttribute('r','15');
-    halo.setAttribute('fill','transparent'); halo.style.touchAction='none'; halo.style.cursor='ns-resize';
+    halo.setAttribute('cx',x); halo.setAttribute('cy',y); halo.setAttribute('r','16');
+    halo.setAttribute('fill','transparent'); halo.style.touchAction='none'; halo.style.cursor='move';
     halo.setAttribute('role','slider'); halo.setAttribute('tabindex','0');
-    halo.setAttribute('aria-label',opts.label);
+    halo.setAttribute('aria-label',opts.label+' two dimensional curve control');
     halo.setAttribute('aria-valuemin',String(MIN_RADIUS));
     halo.setAttribute('aria-valuemax',String(MAX_RADIUS));
     halo.setAttribute('aria-valuenow',String(Math.round(valueOf(opts.id))));
@@ -136,6 +163,10 @@
     circle.setAttribute('cx',x); circle.setAttribute('cy',y); circle.setAttribute('r','7');
     circle.setAttribute('fill','#fff'); circle.setAttribute('stroke','#6f7f5f'); circle.setAttribute('stroke-width','2');
     circle.style.pointerEvents='none';
+
+    const cross=document.createElementNS(svgNS,'path');
+    cross.setAttribute('d',`M ${x-3} ${y} L ${x+3} ${y} M ${x} ${y-3} L ${x} ${y+3}`);
+    cross.setAttribute('stroke','#6f7f5f'); cross.setAttribute('stroke-width','1'); cross.style.pointerEvents='none';
 
     const text=document.createElementNS(svgNS,'text');
     text.setAttribute('x',x+10); text.setAttribute('y',y-8);
@@ -146,17 +177,30 @@
       e.preventDefault();
       const pt=pointToSvg(svg,e.clientX,e.clientY);
       if(!pt) return;
-      drag={pointerId:e.pointerId,startY:pt.y,startRadius:valueOf(opts.id),id:opts.id};
+      drag={
+        pointerId:e.pointerId,
+        startY:pt.y,
+        startRadius:valueOf(opts.id),
+        id:opts.id,
+        x0:opts.x0,
+        x1:opts.x1
+      };
     });
 
     halo.addEventListener('keydown',e=>{
-      if(e.key!=='ArrowUp'&&e.key!=='ArrowDown') return;
-      e.preventDefault();
-      const step=e.shiftKey?10:2;
-      setRadius(opts.id,valueOf(opts.id)+(e.key==='ArrowUp'?step:-step));
+      const rStep=e.shiftKey?10:2;
+      const tStep=e.shiftKey?0.04:0.015;
+      if(e.key==='ArrowUp'||e.key==='ArrowDown'){
+        e.preventDefault();
+        setRadius(opts.id,valueOf(opts.id)+(e.key==='ArrowUp'?rStep:-rStep));
+      }else if(e.key==='ArrowLeft'||e.key==='ArrowRight'){
+        e.preventDefault();
+        setHandleT(opts.id,handleTFor(opts.id)+(e.key==='ArrowRight'?tStep:-tStep));
+        renderAll();
+      }
     });
 
-    g.append(guide,halo,circle,text);
+    g.append(guide,halo,circle,cross,text);
     svg.appendChild(g);
   }
 
@@ -168,18 +212,17 @@
     const p=readInputs();
     const widthFn=window.makeWidthFunction(p);
 
-    const frontX=p.waistPos+(p.lowerBoutPos-p.waistPos)*0.34;
-    const tailX=p.lowerBoutPos+(p.bodyLength-p.lowerBoutPos)*0.58;
-
     appendRadiusHandle(svg,p,widthFn,{
       id:'lowerBoutFrontRadius',
-      x:frontX,
+      x0:p.waistPos,
+      x1:p.lowerBoutPos,
       label:'Lower bout front radius',
       shortLabel:'Front Radius'
     });
     appendRadiusHandle(svg,p,widthFn,{
       id:'lowerBoutRadius',
-      x:tailX,
+      x0:p.lowerBoutPos,
+      x1:p.bodyLength,
       label:'Lower bout tail radius',
       shortLabel:'Tail Radius'
     });
@@ -192,14 +235,27 @@
     const pt=pointToSvg(svg,e.clientX,e.clientY);
     if(!pt) return;
     e.preventDefault();
-    const delta=drag.startY-pt.y;
-    setRadius(drag.id,drag.startRadius+delta*1.35);
+
+    const span=Math.max(1,drag.x1-drag.x0);
+    const newT=clamp((pt.x-drag.x0)/span,MIN_T,MAX_T);
+    const deltaY=drag.startY-pt.y;
+    setHandleT(drag.id,newT);
+    setRadius(drag.id,drag.startRadius+deltaY*1.35,false);
+    renderAll();
   },{passive:false});
 
   window.addEventListener('pointerup',e=>{if(drag&&e.pointerId===drag.pointerId) drag=null;});
   window.addEventListener('pointercancel',()=>{drag=null;});
 
   ensureInputs();
+
+  const reset=document.getElementById('resetBtn');
+  if(reset){
+    reset.addEventListener('click',()=>{
+      frontHandleT=DEFAULT_FRONT_T;
+      tailHandleT=DEFAULT_TAIL_T;
+    },true);
+  }
 
   const canvas=document.getElementById('canvas');
   if(canvas&&!canvas.__lowerRadiusObserver){
