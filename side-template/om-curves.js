@@ -87,7 +87,6 @@
     const svg=document.querySelector('svg[aria-label="Top view"]');
     if(!svg) return;
 
-    /* Remove stale handle groups before rebuilding them at current positions. */
     svg.querySelectorAll('[data-bout-handle]').forEach(n=>n.remove());
 
     const p=currentParams();
@@ -95,7 +94,7 @@
 
     handleDefs.forEach(def=>{
       const x=p[def.input];
-      const y=0; /* Keep handles on the centerline regardless of body dimensions. */
+      const y=0;
       const bounds=positionBounds(def.key,p);
 
       const g=document.createElementNS(svgNS,'g');
@@ -174,9 +173,6 @@
   window.addEventListener('pointerup',endDrag);
   window.addEventListener('pointercancel',endDrag);
 
-  /* The app's original input listeners call their lexical render() directly,
-     so wrapping window.render is not sufficient. Observe the canvas instead
-     and restore handles after every SVG redraw caused by any dimension change. */
   const canvas=document.getElementById('canvas');
   if(canvas && !canvas.__usonianHandleObserver){
     let scheduled=false;
@@ -192,5 +188,14 @@
     canvas.__usonianHandleObserver=observer;
   }
 
-  decorateTopView();
+  /* The base page performs its first render before this override script is injected.
+     Force a fresh render now that the OM geometry is installed, then decorate it.
+     A second animation-frame render avoids an iOS/Safari startup timing race. */
+  function renderCorrectGeometry(){
+    if(typeof window.render==='function') window.render();
+    decorateTopView();
+  }
+
+  renderCorrectGeometry();
+  requestAnimationFrame(()=>requestAnimationFrame(renderCorrectGeometry));
 })();
