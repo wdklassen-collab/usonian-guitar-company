@@ -10,19 +10,26 @@
     let t=(x-x0)/(x1-x0);
     t=Math.max(0,Math.min(1,t));
 
-    /* Start with a zero-slope cubic transition so upper/lower bout and waist
-       locations remain true local extrema. Then apply a small fixed OM bias
-       to the shoulder/tail segments to make the outline less generic. */
-    let u=smoothstep(t);
+    let u;
+
     if(shape==='neck'){
-      /* Slightly delayed shoulder expansion gives the familiar inward-looking
-         neck transition before it rolls out to the upper bout. */
-      u=Math.pow(u,1.18);
-    } else if(shape==='tail'){
-      /* Hold the lower bout fullness a little longer before turning into the
-         flat tail-block section. */
-      u=1-Math.pow(1-u,1.16);
+      /* OM neck-block -> upper-bout shoulder.
+         Use a quarter-ellipse style progression instead of smoothstep.
+         This leaves the vertical neck-block end with a near-vertical tangent,
+         bows outward continuously with no inflection/S-curve, and arrives
+         horizontal at the upper-bout maximum. */
+      u=Math.sqrt(Math.max(0,1-(1-t)*(1-t)));
+    } else {
+      /* Zero-slope cubic transitions keep the upper/lower bout and waist
+         stations as true local extrema. */
+      u=smoothstep(t);
+      if(shape==='tail'){
+        /* Hold lower-bout fullness slightly longer before turning into the
+           flat tail-block section. */
+        u=1-Math.pow(1-u,1.16);
+      }
     }
+
     return y0+(y1-y0)*u;
   }
 
