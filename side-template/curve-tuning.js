@@ -17,7 +17,7 @@
   }
 
   function frontBias(){
-    return clamp(0.032+(valueOf('lowerBoutFrontRadius')-DEFAULT_RADIUS)*0.00035,-0.02,0.09);
+    return clamp(0.032+(valueOf('lowerBoutFrontRadius')-DEFAULT_RADIUS)*0.00055,-0.035,0.115);
   }
 
   function tailExponent(){
@@ -168,7 +168,7 @@
     const p=readInputs();
     const widthFn=window.makeWidthFunction(p);
 
-    const frontX=p.waistPos+(p.lowerBoutPos-p.waistPos)*0.58;
+    const frontX=p.waistPos+(p.lowerBoutPos-p.waistPos)*0.34;
     const tailX=p.lowerBoutPos+(p.bodyLength-p.lowerBoutPos)*0.58;
 
     appendRadiusHandle(svg,p,widthFn,{
