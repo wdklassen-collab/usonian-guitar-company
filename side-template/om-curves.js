@@ -1,4 +1,4 @@
-/* OM outline override + draggable bout-position handles. */
+/* OM outline override + persistent draggable bout-position handles. */
 (function(){
   function smoothstep(t){
     t=Math.max(0,Math.min(1,t));
@@ -11,18 +11,13 @@
     t=Math.max(0,Math.min(1,t));
 
     let u;
-
     if(shape==='neck'){
-      /* OM neck-block -> upper-bout shoulder: one convex quarter-ellipse. */
       u=Math.sqrt(Math.max(0,1-(1-t)*(1-t)));
     } else if(shape==='tail'){
-      /* OM lower-bout -> tail-block transition: mirrored convex quarter-ellipse. */
       u=1-Math.sqrt(Math.max(0,1-t*t));
     } else {
-      /* Keep bout and waist stations as true local extrema. */
       u=smoothstep(t);
     }
-
     return y0+(y1-y0)*u;
   }
 
@@ -49,9 +44,9 @@
   };
 
   const handleDefs=[
-    {key:'upper', input:'upperBoutPos', width:'upperBoutWidth', label:'Upper bout'},
-    {key:'waist', input:'waistPos', width:'waistWidth', label:'Waist'},
-    {key:'lower', input:'lowerBoutPos', width:'lowerBoutWidth', label:'Lower bout'}
+    {key:'upper', input:'upperBoutPos', label:'Upper bout'},
+    {key:'waist', input:'waistPos', label:'Waist'},
+    {key:'lower', input:'lowerBoutPos', label:'Lower bout'}
   ];
 
   let activeHandle=null;
@@ -76,7 +71,7 @@
     const input=document.getElementById(def.input);
     if(!input) return;
     input.value=value.toFixed(1);
-    if(typeof window.render==='function') window.render();
+    input.dispatchEvent(new Event('input',{bubbles:true}));
   }
 
   function clientXToSvgX(svg,clientX,clientY){
@@ -90,14 +85,18 @@
 
   function decorateTopView(){
     const svg=document.querySelector('svg[aria-label="Top view"]');
-    if(!svg || svg.querySelector('[data-bout-handle]')) return;
+    if(!svg) return;
+
+    /* Remove stale handle groups before rebuilding them at current positions. */
+    svg.querySelectorAll('[data-bout-handle]').forEach(n=>n.remove());
 
     const p=currentParams();
     if(!p) return;
 
     handleDefs.forEach(def=>{
       const x=p[def.input];
-      const y=-p[def.width]/2;
+      const y=0; /* Keep handles on the centerline regardless of body dimensions. */
+      const bounds=positionBounds(def.key,p);
 
       const g=document.createElementNS(svgNS,'g');
       g.setAttribute('data-bout-handle',def.key);
@@ -105,47 +104,49 @@
       const halo=document.createElementNS(svgNS,'circle');
       halo.setAttribute('cx',x);
       halo.setAttribute('cy',y);
-      halo.setAttribute('r','11');
+      halo.setAttribute('r','13');
       halo.setAttribute('fill','transparent');
       halo.style.cursor='ew-resize';
       halo.style.touchAction='none';
+      halo.setAttribute('role','slider');
+      halo.setAttribute('tabindex','0');
+      halo.setAttribute('aria-label',def.label+' position');
+      halo.setAttribute('aria-valuenow',x.toFixed(1));
+      halo.setAttribute('aria-valuemin',bounds[0].toFixed(1));
+      halo.setAttribute('aria-valuemax',bounds[1].toFixed(1));
 
       const circle=document.createElementNS(svgNS,'circle');
       circle.setAttribute('cx',x);
       circle.setAttribute('cy',y);
-      circle.setAttribute('r','5.5');
+      circle.setAttribute('r','6.5');
       circle.setAttribute('fill','#ffffff');
       circle.setAttribute('stroke','#9b5f36');
       circle.setAttribute('stroke-width','2');
       circle.style.pointerEvents='none';
 
-      const grip=document.createElementNS(svgNS,'line');
-      grip.setAttribute('x1',x-2.5);
-      grip.setAttribute('x2',x+2.5);
-      grip.setAttribute('y1',y);
-      grip.setAttribute('y2',y);
+      const grip=document.createElementNS(svgNS,'path');
+      grip.setAttribute('d',`M ${x-3.2} ${y-2.5} L ${x+3.2} ${y-2.5} M ${x-3.2} ${y+2.5} L ${x+3.2} ${y+2.5}`);
       grip.setAttribute('stroke','#9b5f36');
-      grip.setAttribute('stroke-width','1.3');
+      grip.setAttribute('stroke-width','1.2');
+      grip.setAttribute('fill','none');
       grip.style.pointerEvents='none';
-
-      halo.setAttribute('role','slider');
-      halo.setAttribute('tabindex','0');
-      halo.setAttribute('aria-label',def.label+' position');
-      halo.setAttribute('aria-valuenow',x.toFixed(1));
-      halo.setAttribute('aria-valuemin',positionBounds(def.key,p)[0].toFixed(1));
-      halo.setAttribute('aria-valuemax',positionBounds(def.key,p)[1].toFixed(1));
 
       halo.addEventListener('pointerdown',e=>{
         e.preventDefault();
         activeHandle={def,pointerId:e.pointerId};
+        if(halo.setPointerCapture){
+          try{ halo.setPointerCapture(e.pointerId); }catch(_e){}
+        }
       });
 
       halo.addEventListener('keydown',e=>{
         if(e.key!=='ArrowLeft' && e.key!=='ArrowRight') return;
         e.preventDefault();
+        const latest=currentParams();
+        if(!latest) return;
         const step=e.shiftKey?5:1;
         const dir=e.key==='ArrowLeft'?-1:1;
-        setPosition(def,p[def.input]+dir*step);
+        setPosition(def,latest[def.input]+dir*step);
       });
 
       g.appendChild(halo);
@@ -165,21 +166,31 @@
     setPosition(activeHandle.def,x);
   },{passive:false});
 
-  window.addEventListener('pointerup',e=>{
-    if(activeHandle && e.pointerId===activeHandle.pointerId) activeHandle=null;
-  });
-  window.addEventListener('pointercancel',()=>{ activeHandle=null; });
+  function endDrag(e){
+    if(!activeHandle) return;
+    if(e && e.pointerId!==undefined && e.pointerId!==activeHandle.pointerId) return;
+    activeHandle=null;
+  }
+  window.addEventListener('pointerup',endDrag);
+  window.addEventListener('pointercancel',endDrag);
 
-  /* Wrap the app renderer once so handles are restored after every redraw. */
-  if(typeof window.render==='function' && !window.render.__usonianHandles){
-    const baseRender=window.render;
-    const wrapped=function(){
-      baseRender();
-      decorateTopView();
-    };
-    wrapped.__usonianHandles=true;
-    window.render=wrapped;
+  /* The app's original input listeners call their lexical render() directly,
+     so wrapping window.render is not sufficient. Observe the canvas instead
+     and restore handles after every SVG redraw caused by any dimension change. */
+  const canvas=document.getElementById('canvas');
+  if(canvas && !canvas.__usonianHandleObserver){
+    let scheduled=false;
+    const observer=new MutationObserver(()=>{
+      if(scheduled) return;
+      scheduled=true;
+      requestAnimationFrame(()=>{
+        scheduled=false;
+        decorateTopView();
+      });
+    });
+    observer.observe(canvas,{childList:true,subtree:false});
+    canvas.__usonianHandleObserver=observer;
   }
 
-  if(typeof window.render==='function') window.render();
+  decorateTopView();
 })();
