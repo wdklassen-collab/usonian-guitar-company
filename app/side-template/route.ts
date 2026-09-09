@@ -18,7 +18,13 @@ export async function GET() {
 
   if (curveResponse.ok) {
     const curves = await curveResponse.text();
-    html = html.replace("</body>", `<script>${curves}</script></body>`);
+    const closingBody = html.lastIndexOf("</body>");
+    if (closingBody !== -1) {
+      html =
+        html.slice(0, closingBody) +
+        `<script>${curves}</script>` +
+        html.slice(closingBody);
+    }
   }
 
   return new Response(html, {
