@@ -14,6 +14,7 @@
     waistPos:204.5,
     lowerBoutWidth:381.1,
     lowerBoutPos:355.6,
+    lowerBoutFrontRadius:140,
     lowerBoutRadius:140
   };
 
@@ -25,8 +26,6 @@
     if(typeof window.render==='function') window.render();
   }
 
-  // This is the authoritative OM reset. Use capture phase so it runs before
-  // older reset listeners installed by the base page and geometry add-ons.
   const reset=document.getElementById('resetBtn');
   if(reset){
     reset.addEventListener('click',e=>{
