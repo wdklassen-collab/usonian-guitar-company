@@ -14,20 +14,19 @@
 
     if(shape==='neck'){
       /* OM neck-block -> upper-bout shoulder.
-         Use a quarter-ellipse style progression instead of smoothstep.
-         This leaves the vertical neck-block end with a near-vertical tangent,
-         bows outward continuously with no inflection/S-curve, and arrives
-         horizontal at the upper-bout maximum. */
+         Quarter-ellipse style: near-vertical at the flat neck-block end,
+         continuously convex, horizontal at the upper-bout maximum. */
       u=Math.sqrt(Math.max(0,1-(1-t)*(1-t)));
+    } else if(shape==='tail'){
+      /* OM lower-bout -> tail-block transition.
+         Mirror of the neck treatment: horizontal at the lower-bout maximum,
+         then one continuous convex turn into a near-vertical tangent at the
+         flat tail-block end, with no S-curve or inflection. */
+      u=1-Math.sqrt(Math.max(0,1-t*t));
     } else {
-      /* Zero-slope cubic transitions keep the upper/lower bout and waist
+      /* Zero-slope cubic transitions keep upper/lower bout and waist
          stations as true local extrema. */
       u=smoothstep(t);
-      if(shape==='tail'){
-        /* Hold lower-bout fullness slightly longer before turning into the
-           flat tail-block section. */
-        u=1-Math.pow(1-u,1.16);
-      }
     }
 
     return y0+(y1-y0)*u;
@@ -55,6 +54,5 @@
     };
   };
 
-  /* Re-render after replacing the width function. */
   if(typeof render==='function') render();
 })();
