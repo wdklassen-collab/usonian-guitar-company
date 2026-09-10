@@ -2,7 +2,7 @@
 (function(){
   const presets={
     om14:{
-      label:'OM-14',
+      label:'OM',
       values:{
         bodyLength:485.8,backRadius:4572,neckDepth:79.3,tailDepth:104.5,
         neckExtension:15,tailExtension:15,neckBlockWidth:63.5,tailBlockWidth:63.5,
@@ -12,7 +12,7 @@
       }
     },
     dread14:{
-      label:'Dreadnought-14',
+      label:'Dreadnought',
       values:{
         bodyLength:508.0,backRadius:4572,neckDepth:100.0,tailDepth:123.8,
         neckExtension:15,tailExtension:15,neckBlockWidth:76.2,tailBlockWidth:76.2,
@@ -48,15 +48,21 @@
         select.appendChild(option);
       });
       select.value=currentPreset;
-      select.addEventListener('change',()=>applyPreset(select.value));
+      select.addEventListener('change',()=>{
+        currentPreset=select.value;
+        applyPreset(select.value);
+      });
     }
 
     const reset=document.getElementById('resetBtn');
     if(reset){
+      reset.textContent='Reset to Defaults';
       reset.addEventListener('click',e=>{
         e.preventDefault();
         e.stopImmediatePropagation();
-        applyPreset(currentPreset);
+        const selected=document.getElementById('preset');
+        const key=selected&&presets[selected.value]?selected.value:currentPreset;
+        applyPreset(key);
       },true);
     }
   }
