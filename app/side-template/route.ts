@@ -2,16 +2,18 @@ const SOURCE = "https://raw.githubusercontent.com/wdklassen-collab/usonian-guita
 const OM_CURVES = "https://raw.githubusercontent.com/wdklassen-collab/usonian-guitar-company/main/side-template/om-curves.js";
 const CURVE_TUNING = "https://raw.githubusercontent.com/wdklassen-collab/usonian-guitar-company/main/side-template/curve-tuning.js";
 const UPPER_CURVES = "https://raw.githubusercontent.com/wdklassen-collab/usonian-guitar-company/main/side-template/upper-curve-handles.js";
+const PRESETS = "https://raw.githubusercontent.com/wdklassen-collab/usonian-guitar-company/main/side-template/presets.js";
 const OM_DEFAULTS = "https://raw.githubusercontent.com/wdklassen-collab/usonian-guitar-company/main/side-template/defaults.js";
 const PRINT_FIX = "https://raw.githubusercontent.com/wdklassen-collab/usonian-guitar-company/main/side-template/print-fix.js";
 const DEVELOPED_SIDE = "https://raw.githubusercontent.com/wdklassen-collab/usonian-guitar-company/main/side-template/developed-side.js";
 
 export async function GET() {
-  const [htmlResponse, curveResponse, tuningResponse, upperResponse, defaultsResponse, printFixResponse, developedResponse] = await Promise.all([
+  const [htmlResponse, curveResponse, tuningResponse, upperResponse, presetsResponse, defaultsResponse, printFixResponse, developedResponse] = await Promise.all([
     fetch(SOURCE, { cache: "no-store" }),
     fetch(OM_CURVES, { cache: "no-store" }),
     fetch(CURVE_TUNING, { cache: "no-store" }),
     fetch(UPPER_CURVES, { cache: "no-store" }),
+    fetch(PRESETS, { cache: "no-store" }),
     fetch(OM_DEFAULTS, { cache: "no-store" }),
     fetch(PRINT_FIX, { cache: "no-store" }),
     fetch(DEVELOPED_SIDE, { cache: "no-store" }),
@@ -30,6 +32,9 @@ export async function GET() {
   if (curveResponse.ok) scripts.push(await curveResponse.text());
   if (tuningResponse.ok) scripts.push(await tuningResponse.text());
   if (upperResponse.ok) scripts.push(await upperResponse.text());
+  // Load presets before the legacy OM defaults so preset-aware Reset owns
+  // the capture-phase click handler while initial startup still defaults to OM.
+  if (presetsResponse.ok) scripts.push(await presetsResponse.text());
   if (defaultsResponse.ok) scripts.push(await defaultsResponse.text());
   // Load the iOS-safe print handler before developed-side.js so its capture
   // listener takes ownership of the Tiled Print button.
