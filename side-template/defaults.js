@@ -14,6 +14,8 @@
     waistPos:204.5,
     lowerBoutWidth:381.1,
     lowerBoutPos:355.6,
+    upperBoutNeckRadius:140,
+    upperBoutWaistRadius:140,
     lowerBoutFrontRadius:140,
     lowerBoutRadius:140
   };
