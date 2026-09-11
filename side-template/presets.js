@@ -8,8 +8,7 @@
         neckExtension:15,tailExtension:15,neckBlockWidth:63.5,tailBlockWidth:63.5,
         upperBoutWidth:288.7,upperBoutPos:103.4,waistWidth:234.3,waistPos:204.5,
         lowerBoutWidth:381.1,lowerBoutPos:355.6,
-        upperBoutNeckRadius:140,upperBoutWaistRadius:140,lowerBoutFrontRadius:140,lowerBoutRadius:140,
-        lowerFrontPosition:34
+        upperBoutNeckRadius:140,upperBoutWaistRadius:140,lowerBoutFrontRadius:140,lowerBoutRadius:140
       }
     },
     dread14:{
@@ -19,8 +18,7 @@
         neckExtension:15,tailExtension:15,neckBlockWidth:76.2,tailBlockWidth:76.2,
         upperBoutWidth:292.1,upperBoutPos:111.1,waistWidth:276.2,waistPos:228.6,
         lowerBoutWidth:396.9,lowerBoutPos:381.0,
-        upperBoutNeckRadius:165,upperBoutWaistRadius:155,lowerBoutFrontRadius:165,lowerBoutRadius:175,
-        lowerFrontPosition:34
+        upperBoutNeckRadius:165,upperBoutWaistRadius:155,lowerBoutFrontRadius:165,lowerBoutRadius:175
       }
     }
   };

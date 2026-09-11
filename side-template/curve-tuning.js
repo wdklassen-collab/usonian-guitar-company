@@ -9,6 +9,7 @@
   const MAX_T=0.86;
   const svgNS='http://www.w3.org/2000/svg';
 
+  let frontHandleT=DEFAULT_FRONT_T;
   let tailHandleT=DEFAULT_TAIL_T;
   let drag=null;
 
@@ -23,28 +24,12 @@
     return clamp(Number.isFinite(n)?n:DEFAULT_RADIUS,MIN_RADIUS,MAX_RADIUS);
   }
 
-  function frontDefault(){
-    const selected=document.getElementById('preset');
-    const preset=window.usonianSidePresets && window.usonianSidePresets[selected && selected.value];
-    return preset?preset.values.lowerBoutFrontRadius:DEFAULT_RADIUS;
-  }
   function frontBias(){
-    return clamp(0.032+(frontDefault()-DEFAULT_RADIUS)*0.00055,-0.035,0.115);
-  }
-  function neutralWidth(t,y0,y1){
-    return y0+(y1-y0)*(smoothstep(t)+frontBias()*bump(t));
-  }
-  function controlOffset(id){
-    return (valueOf(id)-(id==='lowerBoutFrontRadius'?frontDefault():DEFAULT_RADIUS))*0.5;
-  }
-  function influence(t,center){
-    // Endpoint-flat and normalized: a control has equal authority anywhere
-    // in its permitted range, rather than fading out near the lower anchor.
-    return bump(t)/bump(center)*Math.exp(-Math.pow((t-center)/0.20,2));
+    return clamp(0.032+(valueOf('lowerBoutFrontRadius')-DEFAULT_RADIUS)*0.00055,-0.035,0.115);
   }
 
   function frontSkew(){
-    return clamp((handleTFor('lowerBoutFrontRadius')-DEFAULT_FRONT_T)*0.42,-0.11,0.16);
+    return clamp((frontHandleT-DEFAULT_FRONT_T)*0.42,-0.11,0.16);
   }
 
   function tailExponent(){
@@ -64,13 +49,9 @@
     }else if(shape==='upper-waist'){
       u=smoothstep(t)-0.022*bump(t);
     }else if(shape==='waist-lower'){
-      const frontT=handleTFor('lowerBoutFrontRadius');
-      const baseline=neutralWidth(t,y0,y1);
-      const concentration=(y1-y0)*frontSkew()*bump(t)*(2*t-1);
-      const displacement=1.4*controlOffset('lowerBoutFrontRadius')*influence(t,frontT);
-      // Only protect the centerline; do not cap fullness at the lower-bout
-      // width. Both anchors and their tangents remain fixed by the basis.
-      return Math.max(2,baseline+concentration+displacement);
+      // Radius changes fullness; horizontal handle movement moves where
+      // curvature is concentrated while preserving both end anchors/slopes.
+      u=smoothstep(t)+frontBias()*bump(t)+frontSkew()*bump(t)*(2*t-1);
     }else if(shape==='tail'){
       const base=1-Math.sqrt(Math.max(0,1-Math.pow(t,tailExponent())));
       u=base+tailSkew()*bump(t)*(2*t-1);
@@ -104,7 +85,7 @@
 
   function renderAll(){if(typeof window.render==='function') window.render();}
 
-  function addRadiusInput(id,labelText,afterId,positionDefault){
+  function addRadiusInput(id,labelText,afterId){
     if(document.getElementById(id)) return;
     const after=document.getElementById(afterId);
     if(!after||!after.parentElement||!after.parentElement.parentElement) return;
@@ -113,27 +94,22 @@
     const input=document.createElement('input');
     input.id=id;
     input.type='number';
-    input.step=positionDefault===undefined?'1':'0.1';
-    input.min=positionDefault===undefined?String(MIN_RADIUS):'14';
-    input.max=positionDefault===undefined?String(MAX_RADIUS):'86';
-    input.value=String(positionDefault===undefined?DEFAULT_RADIUS:positionDefault);
+    input.step='1';
+    input.min=String(MIN_RADIUS);
+    input.max=String(MAX_RADIUS);
+    input.value=String(DEFAULT_RADIUS);
     input.setAttribute('aria-label',labelText);
     label.appendChild(input);
     after.parentElement.parentElement.appendChild(label);
     input.addEventListener('input',()=>{
-      if(input.value==='' || !Number.isFinite(Number(input.value))) return;
-      if(positionDefault!==undefined) setHandleT('lowerBoutFrontRadius',Number(input.value)/100);
+      const n=Number(input.value);
+      if(Number.isFinite(n)) input.value=String(clamp(n,MIN_RADIUS,MAX_RADIUS));
       renderAll();
-    });
-    input.addEventListener('change',()=>{
-      if(positionDefault===undefined) setRadius(id,valueOf(id));
-      else {setHandleT('lowerBoutFrontRadius',position(id,positionDefault/100));renderAll();}
     });
   }
 
   function ensureInputs(){
-    addRadiusInput('lowerFrontPosition','Front Radius Position (% waist to lower)','lowerBoutPos',34);
-    addRadiusInput('lowerBoutFrontRadius','Front Radius Fullness','lowerBoutPos');
+    addRadiusInput('lowerBoutFrontRadius','Lower Bout Front Radius (mm)','lowerBoutPos');
     addRadiusInput('lowerBoutRadius','Lower Bout Tail Radius (mm)','lowerBoutPos');
   }
 
@@ -152,33 +128,25 @@
     if(doRender) renderAll();
   }
 
-  function position(id,fallback){
-    const input=document.getElementById(id);
-    const value=input && input.value!==''?Number(input.value)/100:fallback;
-    return Number.isFinite(value)?value:fallback;
-  }
   function handleTFor(id){
-    return id==='lowerBoutRadius'?tailHandleT:clamp(position('lowerFrontPosition',DEFAULT_FRONT_T),MIN_T,MAX_T);
+    return id==='lowerBoutFrontRadius'?frontHandleT:tailHandleT;
   }
+
   function setHandleT(id,value){
-    if(id==='lowerBoutRadius'){tailHandleT=clamp(value,MIN_T,MAX_T);return;}
-    const input=document.getElementById('lowerFrontPosition');
-    if(input) input.value=(100*clamp(value,MIN_T,MAX_T)).toFixed(1);
+    if(id==='lowerBoutFrontRadius') frontHandleT=clamp(value,MIN_T,MAX_T);
+    else tailHandleT=clamp(value,MIN_T,MAX_T);
   }
 
   function appendRadiusHandle(svg,p,widthFn,opts){
     const t=handleTFor(opts.id);
     const x=opts.x0+(opts.x1-opts.x0)*t;
-    const curveY=-widthFn(x)/2;
-    const independent=opts.id!=='lowerBoutRadius';
-    const neutralT=DEFAULT_FRONT_T;
-    const y=independent?-neutralWidth(neutralT,p.waistWidth,p.lowerBoutWidth)/2-controlOffset(opts.id):curveY;
+    const y=-widthFn(x)/2;
     const g=document.createElementNS(svgNS,'g');
     g.setAttribute('data-lower-radius-handle',opts.id);
 
     const guide=document.createElementNS(svgNS,'line');
     guide.setAttribute('x1',x); guide.setAttribute('x2',x);
-    guide.setAttribute('y1',y); guide.setAttribute('y2',independent?curveY:'0');
+    guide.setAttribute('y1',y); guide.setAttribute('y2','0');
     guide.setAttribute('stroke','#6f7f5f'); guide.setAttribute('stroke-width','0.8');
     guide.setAttribute('stroke-dasharray','3 3'); guide.style.pointerEvents='none';
 
@@ -209,13 +177,9 @@
       e.preventDefault();
       const pt=pointToSvg(svg,e.clientX,e.clientY);
       if(!pt) return;
-      const canvas=document.getElementById('canvas');
-      if(canvas && canvas.setPointerCapture) canvas.setPointerCapture(e.pointerId);
       drag={
         pointerId:e.pointerId,
         startY:pt.y,
-        startX:pt.x,
-        startT:t,
         startRadius:valueOf(opts.id),
         id:opts.id,
         x0:opts.x0,
@@ -273,10 +237,10 @@
     e.preventDefault();
 
     const span=Math.max(1,drag.x1-drag.x0);
-    const newT=drag.startT+(pt.x-drag.startX)/span;
+    const newT=clamp((pt.x-drag.x0)/span,MIN_T,MAX_T);
     const deltaY=drag.startY-pt.y;
     setHandleT(drag.id,newT);
-    setRadius(drag.id,drag.startRadius+deltaY*(drag.id==='lowerBoutRadius'?1.35:2),false);
+    setRadius(drag.id,drag.startRadius+deltaY*1.35,false);
     renderAll();
   },{passive:false});
 
@@ -288,7 +252,7 @@
   const reset=document.getElementById('resetBtn');
   if(reset){
     reset.addEventListener('click',()=>{
-      setHandleT('lowerBoutFrontRadius',DEFAULT_FRONT_T);
+      frontHandleT=DEFAULT_FRONT_T;
       tailHandleT=DEFAULT_TAIL_T;
     },true);
   }
