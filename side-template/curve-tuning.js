@@ -25,8 +25,24 @@
     return clamp(Number.isFinite(n)?n:DEFAULT_RADIUS,MIN_RADIUS,MAX_RADIUS);
   }
 
+  function frontDefault(){
+    const selected=document.getElementById('preset');
+    const preset=window.usonianSidePresets && window.usonianSidePresets[selected && selected.value];
+    return preset?preset.values.lowerBoutFrontRadius:DEFAULT_RADIUS;
+  }
   function frontBias(){
-    return clamp(0.032+(valueOf('lowerBoutFrontRadius')-DEFAULT_RADIUS)*0.00055,-0.035,0.115);
+    return clamp(0.032+(frontDefault()-DEFAULT_RADIUS)*0.00055,-0.035,0.115);
+  }
+  function neutralWidth(t,y0,y1){
+    return y0+(y1-y0)*(smoothstep(t)+frontBias()*bump(t));
+  }
+  function controlOffset(id){
+    return (valueOf(id)-(id==='lowerBoutFrontRadius'?frontDefault():DEFAULT_RADIUS))*0.5;
+  }
+  function influence(t,center){
+    // Endpoint-flat and normalized: a control has equal authority anywhere
+    // in its permitted range, rather than fading out near the lower anchor.
+    return bump(t)/bump(center)*Math.exp(-Math.pow((t-center)/0.20,2));
   }
 
   function frontSkew(){
@@ -50,16 +66,16 @@
     }else if(shape==='upper-waist'){
       u=smoothstep(t)-0.022*bump(t);
     }else if(shape==='waist-lower'){
-      // Radius changes fullness; horizontal handle movement moves where
-      // curvature is concentrated while preserving both end anchors/slopes.
-      u=smoothstep(t)+frontBias()*bump(t)+frontSkew()*bump(t)*(2*t-1);
-      // A neutral second control leaves both preset curves exactly unchanged.
-      // Localized, endpoint-flat support rounds the approach without moving
-      // either anchor or altering its tangent. X shifts the concentration.
+      const frontT=handleTFor('lowerBoutFrontRadius');
       const approachT=handleTFor('lowerApproachFullness');
-      const local=bump(t)*Math.exp(-Math.pow((t-approachT)/0.24,2));
-      u+=local*((valueOf('lowerApproachFullness')-DEFAULT_RADIUS)*0.0008+
-        (approachT-DEFAULT_APPROACH_T)*0.12*(2*t-1));
+      const baseline=neutralWidth(t,y0,y1);
+      const concentration=(y1-y0)*(frontSkew()*bump(t)*(2*t-1)+
+        (approachT-DEFAULT_APPROACH_T)*0.12*bump(t)*(2*t-1));
+      const displacement=1.4*(controlOffset('lowerBoutFrontRadius')*influence(t,frontT)+
+        controlOffset('lowerApproachFullness')*influence(t,approachT));
+      // Only protect the centerline; do not cap fullness at the lower-bout
+      // width. Both anchors and their tangents remain fixed by the basis.
+      return Math.max(2,baseline+concentration+displacement);
     }else if(shape==='tail'){
       const base=1-Math.sqrt(Math.max(0,1-Math.pow(t,tailExponent())));
       u=base+tailSkew()*bump(t)*(2*t-1);
@@ -166,13 +182,16 @@
   function appendRadiusHandle(svg,p,widthFn,opts){
     const t=handleTFor(opts.id);
     const x=opts.x0+(opts.x1-opts.x0)*t;
-    const y=-widthFn(x)/2;
+    const curveY=-widthFn(x)/2;
+    const independent=opts.id!=='lowerBoutRadius';
+    const neutralT=opts.id==='lowerBoutFrontRadius'?DEFAULT_FRONT_T:DEFAULT_APPROACH_T;
+    const y=independent?-neutralWidth(neutralT,p.waistWidth,p.lowerBoutWidth)/2-controlOffset(opts.id):curveY;
     const g=document.createElementNS(svgNS,'g');
     g.setAttribute('data-lower-radius-handle',opts.id);
 
     const guide=document.createElementNS(svgNS,'line');
     guide.setAttribute('x1',x); guide.setAttribute('x2',x);
-    guide.setAttribute('y1',y); guide.setAttribute('y2','0');
+    guide.setAttribute('y1',y); guide.setAttribute('y2',independent?curveY:'0');
     guide.setAttribute('stroke','#6f7f5f'); guide.setAttribute('stroke-width','0.8');
     guide.setAttribute('stroke-dasharray','3 3'); guide.style.pointerEvents='none';
 
@@ -208,6 +227,8 @@
       drag={
         pointerId:e.pointerId,
         startY:pt.y,
+        startX:pt.x,
+        startT:t,
         startRadius:valueOf(opts.id),
         id:opts.id,
         x0:opts.x0,
@@ -272,10 +293,10 @@
     e.preventDefault();
 
     const span=Math.max(1,drag.x1-drag.x0);
-    const newT=(pt.x-drag.x0)/span;
+    const newT=drag.startT+(pt.x-drag.startX)/span;
     const deltaY=drag.startY-pt.y;
     setHandleT(drag.id,newT);
-    setRadius(drag.id,drag.startRadius+deltaY*1.35,false);
+    setRadius(drag.id,drag.startRadius+deltaY*(drag.id==='lowerBoutRadius'?1.35:2),false);
     renderAll();
   },{passive:false});
 

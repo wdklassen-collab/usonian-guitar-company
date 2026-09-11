@@ -8,7 +8,7 @@ const presets=await readFile('side-template/presets.js','utf8');
 const developed=await readFile('side-template/developed-side.js','utf8');
 const base=await readFile('side-template/index.html','utf8');
 function setup(){
-  const elements=new Map(),events=new Map(),frames=[];
+  const elements=new Map(),events=new Map(),frames=[],observers=[];
   class Element{
     constructor(){this.children=[];this.attrs={};this.style={};this.listeners={};this.value='';}
     set id(id){this._id=id;elements.set(id,this);} get id(){return this._id;}
@@ -26,7 +26,7 @@ function setup(){
   const parent=new Element(),svg=new Element();
   for(const id of ['lowerBoutPos','resetBtn','preset','canvas']){const label=new Element(),input=new Element();input.id=id;parent.appendChild(label).appendChild(input);}
   const document={getElementById:id=>elements.get(id),createElement:()=>new Element(),createElementNS:()=>new Element(),querySelector:()=>svg};
-  const c=vm.createContext({document,Math,Number,console,MutationObserver:class{observe(){}},requestAnimationFrame:fn=>frames.push(fn)});
+  const c=vm.createContext({document,Math,Number,console,MutationObserver:class{constructor(fn){observers.push(fn);}observe(){}},requestAnimationFrame:fn=>frames.push(fn)});
   c.window=c;c.addEventListener=(type,fn)=>{(events.get(type)??events.set(type,[]).get(type)).push(fn);};
   c.render=()=>{};
   const run=s=>vm.runInContext(s,c);
@@ -40,7 +40,7 @@ function setup(){
   function edit(id,value){elements.get(id).value=String(value);elements.get(id).fire('input');}
   function handle(id){return svg.children.find(e=>e.attrs['data-lower-radius-handle']===id).children[1];}
   // Trigger decoration after renders, as the real MutationObserver does.
-  c.render=()=>{elements.get('canvas').children=[];};
+  c.render=()=>{observers.forEach(fn=>fn());};
   return {c,e:elements,svg,events,flush,edit,handle};
 }
 for(const key of ['om14','dread14']){
@@ -70,6 +70,19 @@ for(const key of ['om14','dread14']){
     h.edit('lowerApproachPosition',0);
     assert.ok(Number(h.e.get('lowerApproachPosition').value)>=Number(h.e.get('lowerFrontPosition').value)+8);
     h.c.applyUsonianSidePreset(key);
+    h.flush();
+    for(const [id,pos] of [['lowerBoutFrontRadius','lowerFrontPosition'],['lowerApproachFullness','lowerApproachPosition']]){
+      const oldY=Number(h.handle(id).attrs.cy);
+      const oldT=Number(h.e.get(pos).value);
+      h.edit(pos,oldT+3);h.flush();
+      assert.equal(Number(h.handle(id).attrs.cy),oldY,'horizontal movement does not slide vertically along the outline');
+      const x=p.waistPos+(p.lowerBoutPos-p.waistPos)*(oldT+3)/100;
+      const before=h.c.makeWidthFunction(p)(x);
+      h.edit(id,Number(h.e.get(id).value)+40);h.flush();
+      assert.ok(Math.abs(Number(h.handle(id).attrs.cy)-(oldY-20))<1e-9,'20 mm independent control movement');
+      assert.ok(Math.abs((h.c.makeWidthFunction(p)(x)-before)/2-14)<1e-9,'strong 14 mm curve response');
+      h.c.applyUsonianSidePreset(key);h.flush();
+    }
     // Actual pointer event handlers, with nonzero horizontal and vertical motion.
     for(const [id,pos] of [['lowerBoutFrontRadius','lowerFrontPosition'],['lowerApproachFullness','lowerApproachPosition']]){
       const halo=h.handle(id),oldT=Number(h.e.get(pos).value),oldR=Number(h.e.get(id).value);
