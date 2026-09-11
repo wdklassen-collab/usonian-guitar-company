@@ -14,9 +14,9 @@
     dread14:{
       label:'Dreadnought',
       values:{
-        bodyLength:508.0,backRadius:4572,neckDepth:100.0,tailDepth:123.8,
-        neckExtension:15,tailExtension:15,neckBlockWidth:76.2,tailBlockWidth:76.2,
-        upperBoutWidth:292.1,upperBoutPos:111.1,waistWidth:276.2,waistPos:228.6,
+        bodyLength:513.3,backRadius:4572,neckDepth:95.3,tailDepth:120.7,
+        neckExtension:25,tailExtension:25,neckBlockWidth:63,tailBlockWidth:63,
+        upperBoutWidth:292.6,upperBoutPos:90,waistWidth:273.8,waistPos:190,
         lowerBoutWidth:396.9,lowerBoutPos:381.0,
         upperBoutNeckRadius:165,upperBoutWaistRadius:155,lowerBoutFrontRadius:165,lowerBoutRadius:175
       }
