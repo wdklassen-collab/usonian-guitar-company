@@ -97,57 +97,6 @@
     return `<svg viewBox="0 0 ${width} ${totalHeight+2*pad}">${body}</svg>`;
   };
 
-  function developedPrintTiled(){
-    const p=window.readInputs();
-    const g=window.sampleGeometry(p);
-    const pageW=215.9,pageH=279.4;
-    const margin=6.35,overlap=6.35;
-    const usableW=pageW-2*margin;
-    const usableH=pageH-2*margin;
-    const strideX=usableW-overlap;
-    const strideY=usableH-overlap;
-    const xMin=-p.neckExtension;
-    const xMax=g.sideLength+p.tailExtension;
-    const yMin=0;
-    const yMax=Math.max(...g.samples.map(sample=>sample.d),p.tailDepth)+22;
-    const cols=Math.ceil(Math.max(0,xMax-xMin-usableW)/strideX)+1;
-    const rows=Math.ceil(Math.max(0,yMax-yMin-usableH)/strideY)+1;
-    const side=window.sideViewSVG(p,g,true);
-    const inner=side.replace(/^.*?<svg[^>]*>/s,'').replace(/<\/svg>\s*$/,'');
-    let pages='';
-    let pageNum=0;
-
-    function cross(x,y){
-      return `<line x1="${x-3}" y1="${y}" x2="${x+3}" y2="${y}"/><line x1="${x}" y1="${y-3}" x2="${x}" y2="${y+3}"/>`;
-    }
-
-    for(let r=0;r<rows;r++){
-      for(let c=0;c<cols;c++){
-        pageNum++;
-        const ox=xMin+c*strideX;
-        const oy=yMin+r*strideY;
-        const label=`Row ${r+1} / ${rows} · Col ${c+1} / ${cols}`;
-        pages+=`<div class="page"><svg xmlns="http://www.w3.org/2000/svg" width="${pageW}mm" height="${pageH}mm" viewBox="0 0 ${pageW} ${pageH}"><rect width="${pageW}" height="${pageH}" fill="white"/><defs><clipPath id="clip${pageNum}"><rect x="${margin}" y="${margin}" width="${usableW}" height="${usableH}"/></clipPath></defs><g clip-path="url(#clip${pageNum})" transform="translate(${margin-ox},${margin-oy})">${inner}</g><g stroke="#555" stroke-width="0.25">${cross(margin,margin)}${cross(pageW-margin,margin)}${cross(margin,pageH-margin)}${cross(pageW-margin,pageH-margin)}</g><rect x="${margin+3}" y="${pageH-margin-28}" width="25.4" height="25.4" fill="none" stroke="#222" stroke-width="0.35"/><text x="${margin+3}" y="${pageH-margin-30}" font-size="3.5">1 inch calibration square</text><text x="${pageW/2}" y="${pageH-3.5}" text-anchor="middle" font-size="3.5">${label} · Print at 100% / Actual Size</text></svg></div>`;
-      }
-    }
-
-    const win=window.open('','_blank');
-    if(!win) return;
-    win.document.write(`<!doctype html><html><head><title>Usonian Tiled Side Template</title><style>@page{size:letter portrait;margin:0}html,body{margin:0;padding:0}.page{width:${pageW}mm;height:${pageH}mm;page-break-after:always;overflow:hidden}.page:last-child{page-break-after:auto}svg{display:block;width:${pageW}mm;height:${pageH}mm}</style></head><body>${pages}<script>window.onload=()=>setTimeout(()=>window.print(),150);<\/script></body></html>`);
-    win.document.close();
-  }
-
-  // The base page already attached its old print handler. Capture phase lets
-  // this corrected developed-length handler take ownership of the button.
-  const printButton=document.getElementById('printTiles');
-  if(printButton){
-    printButton.addEventListener('click',event=>{
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      developedPrintTiled();
-    },true);
-  }
-
   // Show developed side length in the existing status row and redraw using
   // the new geometry immediately after this override is injected.
   const baseRender=window.render;

@@ -19,7 +19,7 @@ export async function GET() {
     fetch(DEVELOPED_SIDE, { cache: "no-store" }),
   ]);
 
-  if (!htmlResponse.ok) {
+  if (!htmlResponse.ok || !developedResponse.ok || !printFixResponse.ok) {
     return new Response("Side Template Generator is temporarily unavailable.", {
       status: 502,
       headers: { "content-type": "text/plain; charset=utf-8" },
@@ -36,10 +36,10 @@ export async function GET() {
   // the capture-phase click handler while initial startup still defaults to OM.
   if (presetsResponse.ok) scripts.push(await presetsResponse.text());
   if (defaultsResponse.ok) scripts.push(await defaultsResponse.text());
-  // Load the iOS-safe print handler before developed-side.js so its capture
-  // listener takes ownership of the Tiled Print button.
-  if (printFixResponse.ok) scripts.push(await printFixResponse.text());
-  if (developedResponse.ok) scripts.push(await developedResponse.text());
+  // Geometry loads first. Printing has one owner and reads current geometry
+  // at click time; it never competes with developed-side.js for this button.
+  scripts.push(await developedResponse.text());
+  scripts.push(await printFixResponse.text());
 
   const closingBody = html.lastIndexOf("</body>");
   if (closingBody !== -1 && scripts.length) {
