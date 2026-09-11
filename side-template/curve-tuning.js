@@ -9,8 +9,6 @@
   const MAX_T=0.86;
   const svgNS='http://www.w3.org/2000/svg';
 
-  const DEFAULT_APPROACH_T=0.72;
-  const POSITION_GAP=0.08;
   let tailHandleT=DEFAULT_TAIL_T;
   let drag=null;
 
@@ -67,12 +65,9 @@
       u=smoothstep(t)-0.022*bump(t);
     }else if(shape==='waist-lower'){
       const frontT=handleTFor('lowerBoutFrontRadius');
-      const approachT=handleTFor('lowerApproachFullness');
       const baseline=neutralWidth(t,y0,y1);
-      const concentration=(y1-y0)*(frontSkew()*bump(t)*(2*t-1)+
-        (approachT-DEFAULT_APPROACH_T)*0.12*bump(t)*(2*t-1));
-      const displacement=1.4*(controlOffset('lowerBoutFrontRadius')*influence(t,frontT)+
-        controlOffset('lowerApproachFullness')*influence(t,approachT));
+      const concentration=(y1-y0)*frontSkew()*bump(t)*(2*t-1);
+      const displacement=1.4*controlOffset('lowerBoutFrontRadius')*influence(t,frontT);
       // Only protect the centerline; do not cap fullness at the lower-bout
       // width. Both anchors and their tangents remain fixed by the basis.
       return Math.max(2,baseline+concentration+displacement);
@@ -120,27 +115,25 @@
     input.type='number';
     input.step=positionDefault===undefined?'1':'0.1';
     input.min=positionDefault===undefined?String(MIN_RADIUS):'14';
-    input.max=positionDefault===undefined?String(MAX_RADIUS):'90';
+    input.max=positionDefault===undefined?String(MAX_RADIUS):'86';
     input.value=String(positionDefault===undefined?DEFAULT_RADIUS:positionDefault);
     input.setAttribute('aria-label',labelText);
     label.appendChild(input);
     after.parentElement.parentElement.appendChild(label);
     input.addEventListener('input',()=>{
       if(input.value==='' || !Number.isFinite(Number(input.value))) return;
-      if(positionDefault!==undefined) setHandleT(id==='lowerFrontPosition'?'lowerBoutFrontRadius':'lowerApproachFullness',Number(input.value)/100);
+      if(positionDefault!==undefined) setHandleT('lowerBoutFrontRadius',Number(input.value)/100);
       renderAll();
     });
     input.addEventListener('change',()=>{
       if(positionDefault===undefined) setRadius(id,valueOf(id));
-      else {setHandleT(id==='lowerFrontPosition'?'lowerBoutFrontRadius':'lowerApproachFullness',position(id,positionDefault/100));renderAll();}
+      else {setHandleT('lowerBoutFrontRadius',position(id,positionDefault/100));renderAll();}
     });
   }
 
   function ensureInputs(){
     addRadiusInput('lowerFrontPosition','Front Radius Position (% waist to lower)','lowerBoutPos',34);
     addRadiusInput('lowerBoutFrontRadius','Front Radius Fullness','lowerBoutPos');
-    addRadiusInput('lowerApproachPosition','Lower Approach Position (% waist to lower)','lowerBoutPos',72);
-    addRadiusInput('lowerApproachFullness','Lower Approach Fullness','lowerBoutPos');
     addRadiusInput('lowerBoutRadius','Lower Bout Tail Radius (mm)','lowerBoutPos');
   }
 
@@ -165,18 +158,12 @@
     return Number.isFinite(value)?value:fallback;
   }
   function handleTFor(id){
-    if(id==='lowerBoutRadius') return tailHandleT;
-    const front=clamp(position('lowerFrontPosition',DEFAULT_FRONT_T),MIN_T,0.90-POSITION_GAP);
-    if(id==='lowerBoutFrontRadius') return front;
-    return clamp(position('lowerApproachPosition',DEFAULT_APPROACH_T),front+POSITION_GAP,0.90);
+    return id==='lowerBoutRadius'?tailHandleT:clamp(position('lowerFrontPosition',DEFAULT_FRONT_T),MIN_T,MAX_T);
   }
   function setHandleT(id,value){
     if(id==='lowerBoutRadius'){tailHandleT=clamp(value,MIN_T,MAX_T);return;}
-    const front=id==='lowerBoutFrontRadius';
-    const lower=front?MIN_T:clamp(position('lowerFrontPosition',DEFAULT_FRONT_T),MIN_T,0.82)+POSITION_GAP;
-    const upper=front?clamp(position('lowerApproachPosition',DEFAULT_APPROACH_T),0.22,0.90)-POSITION_GAP:0.90;
-    const input=document.getElementById(front?'lowerFrontPosition':'lowerApproachPosition');
-    if(input) input.value=(100*clamp(value,lower,upper)).toFixed(1);
+    const input=document.getElementById('lowerFrontPosition');
+    if(input) input.value=(100*clamp(value,MIN_T,MAX_T)).toFixed(1);
   }
 
   function appendRadiusHandle(svg,p,widthFn,opts){
@@ -184,7 +171,7 @@
     const x=opts.x0+(opts.x1-opts.x0)*t;
     const curveY=-widthFn(x)/2;
     const independent=opts.id!=='lowerBoutRadius';
-    const neutralT=opts.id==='lowerBoutFrontRadius'?DEFAULT_FRONT_T:DEFAULT_APPROACH_T;
+    const neutralT=DEFAULT_FRONT_T;
     const y=independent?-neutralWidth(neutralT,p.waistWidth,p.lowerBoutWidth)/2-controlOffset(opts.id):curveY;
     const g=document.createElementNS(svgNS,'g');
     g.setAttribute('data-lower-radius-handle',opts.id);
@@ -269,13 +256,6 @@
       shortLabel:'Front Radius'
     });
     appendRadiusHandle(svg,p,widthFn,{
-      id:'lowerApproachFullness',
-      x0:p.waistPos,
-      x1:p.lowerBoutPos,
-      label:'Lower Approach',
-      shortLabel:'Lower Approach'
-    });
-    appendRadiusHandle(svg,p,widthFn,{
       id:'lowerBoutRadius',
       x0:p.lowerBoutPos,
       x1:p.bodyLength,
@@ -309,7 +289,6 @@
   if(reset){
     reset.addEventListener('click',()=>{
       setHandleT('lowerBoutFrontRadius',DEFAULT_FRONT_T);
-      setHandleT('lowerApproachFullness',DEFAULT_APPROACH_T);
       tailHandleT=DEFAULT_TAIL_T;
     },true);
   }

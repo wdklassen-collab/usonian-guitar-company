@@ -56,7 +56,7 @@ for(const key of ['om14','dread14']){
     const baseline=h.c.sampleGeometry(p);
     const anchors=[p.waistPos,p.lowerBoutPos];
     const original=anchors.map(width);
-    for(const [position,fullness] of [['lowerFrontPosition','lowerBoutFrontRadius'],['lowerApproachPosition','lowerApproachFullness']]){
+    for(const [position,fullness] of [['lowerFrontPosition','lowerBoutFrontRadius']]){
       const x=p.waistPos+(p.lowerBoutPos-p.waistPos)*0.63;
       const old=width(x);
       h.edit(position,Number(h.e.get(position).value)+4);
@@ -66,12 +66,12 @@ for(const key of ['om14','dread14']){
       assert.deepEqual(anchors.map(width),original,'anchors stay fixed');
     }
     h.edit('lowerFrontPosition',99);
-    assert.ok(Number(h.e.get('lowerFrontPosition').value)<=Number(h.e.get('lowerApproachPosition').value)-8);
-    h.edit('lowerApproachPosition',0);
-    assert.ok(Number(h.e.get('lowerApproachPosition').value)>=Number(h.e.get('lowerFrontPosition').value)+8);
+    assert.equal(Number(h.e.get('lowerFrontPosition').value),86);
+    assert.ok(!h.e.has('lowerApproachFullness'));
+    assert.ok(!h.e.has('lowerApproachPosition'));
     h.c.applyUsonianSidePreset(key);
     h.flush();
-    for(const [id,pos] of [['lowerBoutFrontRadius','lowerFrontPosition'],['lowerApproachFullness','lowerApproachPosition']]){
+    for(const [id,pos] of [['lowerBoutFrontRadius','lowerFrontPosition']]){
       const oldY=Number(h.handle(id).attrs.cy);
       const oldT=Number(h.e.get(pos).value);
       h.edit(pos,oldT+3);h.flush();
@@ -84,7 +84,7 @@ for(const key of ['om14','dread14']){
       h.c.applyUsonianSidePreset(key);h.flush();
     }
     // Actual pointer event handlers, with nonzero horizontal and vertical motion.
-    for(const [id,pos] of [['lowerBoutFrontRadius','lowerFrontPosition'],['lowerApproachFullness','lowerApproachPosition']]){
+    for(const [id,pos] of [['lowerBoutFrontRadius','lowerFrontPosition']]){
       const halo=h.handle(id),oldT=Number(h.e.get(pos).value),oldR=Number(h.e.get(id).value);
       halo.fire('pointerdown',{pointerId:7,clientX:Number(halo.attrs.cx),clientY:Number(halo.attrs.cy)});
       assert.equal(h.e.get('canvas').captured,7);
@@ -104,7 +104,7 @@ for(const key of ['om14','dread14']){
     assert.match(side,new RegExp(changed.sideLength.toFixed(1)));
     h.e.get('resetBtn').fire('click');
     p=h.c.readInputs();
-    assert.equal(p.lowerFrontPosition,34);assert.equal(p.lowerApproachPosition,72);assert.equal(p.lowerApproachFullness,140);
+    assert.equal(p.lowerFrontPosition,34);
     assert.equal(h.c.sampleGeometry(p).sideLength,baseline.sideLength);
   });
 }
