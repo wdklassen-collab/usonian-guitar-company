@@ -7,8 +7,10 @@ const OM_DEFAULTS = "https://raw.githubusercontent.com/wdklassen-collab/usonian-
 const PRINT_FIX = "https://raw.githubusercontent.com/wdklassen-collab/usonian-guitar-company/main/side-template/print-fix.js";
 const DEVELOPED_SIDE = "https://raw.githubusercontent.com/wdklassen-collab/usonian-guitar-company/main/side-template/developed-side.js";
 
+const OM_DXF = "https://raw.githubusercontent.com/wdklassen-collab/usonian-guitar-company/main/side-template/om-dxf.js";
+
 export async function GET() {
-  const [htmlResponse, curveResponse, tuningResponse, upperResponse, presetsResponse, defaultsResponse, printFixResponse, developedResponse] = await Promise.all([
+  const [htmlResponse, curveResponse, tuningResponse, upperResponse, presetsResponse, defaultsResponse, printFixResponse, developedResponse, dxfResponse] = await Promise.all([
     fetch(SOURCE, { cache: "no-store" }),
     fetch(OM_CURVES, { cache: "no-store" }),
     fetch(CURVE_TUNING, { cache: "no-store" }),
@@ -17,9 +19,10 @@ export async function GET() {
     fetch(OM_DEFAULTS, { cache: "no-store" }),
     fetch(PRINT_FIX, { cache: "no-store" }),
     fetch(DEVELOPED_SIDE, { cache: "no-store" }),
+    fetch(OM_DXF, { cache: "no-store" }),
   ]);
 
-  if (!htmlResponse.ok || !developedResponse.ok || !printFixResponse.ok) {
+  if (!htmlResponse.ok || !developedResponse.ok || !printFixResponse.ok || !dxfResponse.ok) {
     return new Response("Side Template Generator is temporarily unavailable.", {
       status: 502,
       headers: { "content-type": "text/plain; charset=utf-8" },
@@ -38,6 +41,7 @@ export async function GET() {
   if (defaultsResponse.ok) scripts.push(await defaultsResponse.text());
   // Geometry loads first. Printing has one owner and reads current geometry
   // at click time; it never competes with developed-side.js for this button.
+  scripts.push(await dxfResponse.text());
   scripts.push(await developedResponse.text());
   scripts.push(await printFixResponse.text());
 

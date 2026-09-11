@@ -16,8 +16,8 @@
     let prevX=null;
     let prevY=null;
 
-    for(let i=0;i<=n;i++){
-      const x=p.bodyLength*i/n;
+    const xs=widthFn.sampleXs || Array.from({length:n+1},(_,i)=>p.bodyLength*i/n);
+    for(const x of xs){
       const w=widthFn(x);
       const d=depthFn(x);
       const y=-w/2;

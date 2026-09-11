@@ -205,6 +205,7 @@
   }
 
   function decorateRadiusHandles(){
+    if(window.usonianUsesMeasuredOM && window.usonianUsesMeasuredOM()) return;
     const svg=document.querySelector('svg[aria-label="Top view"]');
     if(!svg||typeof readInputs!=='function') return;
     svg.querySelectorAll('[data-lower-radius-handle]').forEach(n=>n.remove());
