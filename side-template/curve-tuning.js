@@ -9,7 +9,8 @@
   const MAX_T=0.86;
   const svgNS='http://www.w3.org/2000/svg';
 
-  let frontHandleT=DEFAULT_FRONT_T;
+  const DEFAULT_APPROACH_T=0.72;
+  const POSITION_GAP=0.08;
   let tailHandleT=DEFAULT_TAIL_T;
   let drag=null;
 
@@ -29,7 +30,7 @@
   }
 
   function frontSkew(){
-    return clamp((frontHandleT-DEFAULT_FRONT_T)*0.42,-0.11,0.16);
+    return clamp((handleTFor('lowerBoutFrontRadius')-DEFAULT_FRONT_T)*0.42,-0.11,0.16);
   }
 
   function tailExponent(){
@@ -52,6 +53,13 @@
       // Radius changes fullness; horizontal handle movement moves where
       // curvature is concentrated while preserving both end anchors/slopes.
       u=smoothstep(t)+frontBias()*bump(t)+frontSkew()*bump(t)*(2*t-1);
+      // A neutral second control leaves both preset curves exactly unchanged.
+      // Localized, endpoint-flat support rounds the approach without moving
+      // either anchor or altering its tangent. X shifts the concentration.
+      const approachT=handleTFor('lowerApproachFullness');
+      const local=bump(t)*Math.exp(-Math.pow((t-approachT)/0.24,2));
+      u+=local*((valueOf('lowerApproachFullness')-DEFAULT_RADIUS)*0.0008+
+        (approachT-DEFAULT_APPROACH_T)*0.12*(2*t-1));
     }else if(shape==='tail'){
       const base=1-Math.sqrt(Math.max(0,1-Math.pow(t,tailExponent())));
       u=base+tailSkew()*bump(t)*(2*t-1);
@@ -85,7 +93,7 @@
 
   function renderAll(){if(typeof window.render==='function') window.render();}
 
-  function addRadiusInput(id,labelText,afterId){
+  function addRadiusInput(id,labelText,afterId,positionDefault){
     if(document.getElementById(id)) return;
     const after=document.getElementById(afterId);
     if(!after||!after.parentElement||!after.parentElement.parentElement) return;
@@ -94,22 +102,29 @@
     const input=document.createElement('input');
     input.id=id;
     input.type='number';
-    input.step='1';
-    input.min=String(MIN_RADIUS);
-    input.max=String(MAX_RADIUS);
-    input.value=String(DEFAULT_RADIUS);
+    input.step=positionDefault===undefined?'1':'0.1';
+    input.min=positionDefault===undefined?String(MIN_RADIUS):'14';
+    input.max=positionDefault===undefined?String(MAX_RADIUS):'90';
+    input.value=String(positionDefault===undefined?DEFAULT_RADIUS:positionDefault);
     input.setAttribute('aria-label',labelText);
     label.appendChild(input);
     after.parentElement.parentElement.appendChild(label);
     input.addEventListener('input',()=>{
-      const n=Number(input.value);
-      if(Number.isFinite(n)) input.value=String(clamp(n,MIN_RADIUS,MAX_RADIUS));
+      if(input.value==='' || !Number.isFinite(Number(input.value))) return;
+      if(positionDefault!==undefined) setHandleT(id==='lowerFrontPosition'?'lowerBoutFrontRadius':'lowerApproachFullness',Number(input.value)/100);
       renderAll();
+    });
+    input.addEventListener('change',()=>{
+      if(positionDefault===undefined) setRadius(id,valueOf(id));
+      else {setHandleT(id==='lowerFrontPosition'?'lowerBoutFrontRadius':'lowerApproachFullness',position(id,positionDefault/100));renderAll();}
     });
   }
 
   function ensureInputs(){
-    addRadiusInput('lowerBoutFrontRadius','Lower Bout Front Radius (mm)','lowerBoutPos');
+    addRadiusInput('lowerFrontPosition','Front Radius Position (% waist to lower)','lowerBoutPos',34);
+    addRadiusInput('lowerBoutFrontRadius','Front Radius Fullness','lowerBoutPos');
+    addRadiusInput('lowerApproachPosition','Lower Approach Position (% waist to lower)','lowerBoutPos',72);
+    addRadiusInput('lowerApproachFullness','Lower Approach Fullness','lowerBoutPos');
     addRadiusInput('lowerBoutRadius','Lower Bout Tail Radius (mm)','lowerBoutPos');
   }
 
@@ -128,13 +143,24 @@
     if(doRender) renderAll();
   }
 
-  function handleTFor(id){
-    return id==='lowerBoutFrontRadius'?frontHandleT:tailHandleT;
+  function position(id,fallback){
+    const input=document.getElementById(id);
+    const value=input && input.value!==''?Number(input.value)/100:fallback;
+    return Number.isFinite(value)?value:fallback;
   }
-
+  function handleTFor(id){
+    if(id==='lowerBoutRadius') return tailHandleT;
+    const front=clamp(position('lowerFrontPosition',DEFAULT_FRONT_T),MIN_T,0.90-POSITION_GAP);
+    if(id==='lowerBoutFrontRadius') return front;
+    return clamp(position('lowerApproachPosition',DEFAULT_APPROACH_T),front+POSITION_GAP,0.90);
+  }
   function setHandleT(id,value){
-    if(id==='lowerBoutFrontRadius') frontHandleT=clamp(value,MIN_T,MAX_T);
-    else tailHandleT=clamp(value,MIN_T,MAX_T);
+    if(id==='lowerBoutRadius'){tailHandleT=clamp(value,MIN_T,MAX_T);return;}
+    const front=id==='lowerBoutFrontRadius';
+    const lower=front?MIN_T:clamp(position('lowerFrontPosition',DEFAULT_FRONT_T),MIN_T,0.82)+POSITION_GAP;
+    const upper=front?clamp(position('lowerApproachPosition',DEFAULT_APPROACH_T),0.22,0.90)-POSITION_GAP:0.90;
+    const input=document.getElementById(front?'lowerFrontPosition':'lowerApproachPosition');
+    if(input) input.value=(100*clamp(value,lower,upper)).toFixed(1);
   }
 
   function appendRadiusHandle(svg,p,widthFn,opts){
@@ -177,6 +203,8 @@
       e.preventDefault();
       const pt=pointToSvg(svg,e.clientX,e.clientY);
       if(!pt) return;
+      const canvas=document.getElementById('canvas');
+      if(canvas && canvas.setPointerCapture) canvas.setPointerCapture(e.pointerId);
       drag={
         pointerId:e.pointerId,
         startY:pt.y,
@@ -220,6 +248,13 @@
       shortLabel:'Front Radius'
     });
     appendRadiusHandle(svg,p,widthFn,{
+      id:'lowerApproachFullness',
+      x0:p.waistPos,
+      x1:p.lowerBoutPos,
+      label:'Lower Approach',
+      shortLabel:'Lower Approach'
+    });
+    appendRadiusHandle(svg,p,widthFn,{
       id:'lowerBoutRadius',
       x0:p.lowerBoutPos,
       x1:p.bodyLength,
@@ -237,7 +272,7 @@
     e.preventDefault();
 
     const span=Math.max(1,drag.x1-drag.x0);
-    const newT=clamp((pt.x-drag.x0)/span,MIN_T,MAX_T);
+    const newT=(pt.x-drag.x0)/span;
     const deltaY=drag.startY-pt.y;
     setHandleT(drag.id,newT);
     setRadius(drag.id,drag.startRadius+deltaY*1.35,false);
@@ -252,7 +287,8 @@
   const reset=document.getElementById('resetBtn');
   if(reset){
     reset.addEventListener('click',()=>{
-      frontHandleT=DEFAULT_FRONT_T;
+      setHandleT('lowerBoutFrontRadius',DEFAULT_FRONT_T);
+      setHandleT('lowerApproachFullness',DEFAULT_APPROACH_T);
       tailHandleT=DEFAULT_TAIL_T;
     },true);
   }
