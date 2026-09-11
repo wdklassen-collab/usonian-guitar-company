@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Usonian 3+3 Headstock Generator</title>
+<style>
+:root{--bg:#171815;--panel:#22231f;--panel2:#2b2c27;--ink:#f1eee7;--muted:#aaa79f;--line:#69665d;--copper:#b87333;--cream:#e7decf;--danger:#d96a5e}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input{font:inherit}button{cursor:pointer}.wrap{max-width:1220px;margin:auto;padding:22px}.top{display:flex;justify-content:space-between;gap:20px;align-items:flex-end;margin-bottom:18px}.eyebrow{letter-spacing:.15em;text-transform:uppercase;color:var(--copper);font-size:12px;font-weight:700}.top h1{font-family:Georgia,serif;font-weight:500;margin:.25rem 0;font-size:clamp(28px,5vw,46px)}.top p{margin:0;color:var(--muted);max-width:700px}.grid{display:grid;grid-template-columns:minmax(270px,330px) minmax(0,1fr);gap:18px}.panel{background:var(--panel);border:1px solid #3a3b35;border-radius:12px;padding:16px}.panel h2{font-size:14px;letter-spacing:.09em;text-transform:uppercase;margin:0 0 12px;color:var(--cream)}.row{display:grid;grid-template-columns:1fr 96px;gap:10px;align-items:center;margin:10px 0}.row label{color:var(--muted)}input[type=number]{width:100%;background:#141512;border:1px solid #4b4b45;color:var(--ink);border-radius:8px;padding:9px}.buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.btn{border:1px solid #55564f;background:#30312c;color:var(--ink);padding:9px 12px;border-radius:8px}.btn.primary{background:var(--copper);border-color:var(--copper);color:#17120e;font-weight:700}.hint{font-size:12px;color:var(--muted);margin-top:10px}.stage-panel{min-width:0}.stage-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}.legend{display:flex;gap:14px;flex-wrap:wrap;color:var(--muted);font-size:12px}.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}.dot.shape{background:var(--copper)}.dot.tuner{background:var(--cream)}.svg-wrap{background:#11120f;border:1px solid #383934;border-radius:12px;overflow:auto;min-height:650px;display:grid;place-items:center;padding:10px}svg{width:100%;height:660px;min-width:520px;touch-action:none}.headstock{fill:#2d2a24;stroke:#d7cbbb;stroke-width:1.6}.center{stroke:#6d6b64;stroke-dasharray:5 5;stroke-width:1}.guide{stroke:#4f4f49;stroke-width:.8}.nut{stroke:#e5dfd4;stroke-width:2.5}.tuner-hole{fill:none;stroke:#e9e1d4;stroke-width:1.4}.handle-line{stroke:#66635b;stroke-width:1;stroke-dasharray:2 3}.handle{fill:var(--copper);stroke:#191713;stroke-width:1.2;cursor:grab}.handle.mirror{fill:none;stroke:#7a756c;stroke-width:1.2;pointer-events:none}.handle.crown{fill:#c9935f}.tuner-handle{fill:var(--cream);stroke:#26231f;stroke-width:1.2;cursor:grab}.selected{stroke:#fff;stroke-width:2.2}.label{fill:#a7a39a;font-size:9px;user-select:none}.dim{fill:#7f7c74;font-size:8px}.station-list{margin-top:16px;border-top:1px solid #3b3c36;padding-top:12px}.station{display:grid;grid-template-columns:1fr 68px 68px;gap:6px;align-items:center;margin:6px 0;font-size:12px}.station input{padding:6px}.status{min-height:20px;margin-top:10px;font-size:12px;color:var(--cream)}.warning{color:var(--danger)}@media(max-width:780px){.wrap{padding:12px}.top{display:block}.grid{grid-template-columns:1fr}.svg-wrap{min-height:520px}svg{height:540px}.stage-head{align-items:flex-start;flex-direction:column}} 
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div><div class="eyebrow">Usonian Guitar Co. · Experimental Builder Tool</div><h1>3+3 Headstock Shape Generator</h1><p>Drag the copper handles to sculpt one side of the outline; the opposite side mirrors automatically. Drag the ivory tuner centers independently.</p></div>
+  </header>
+  <div class="grid">
+    <aside class="panel">
+      <h2>Basic geometry</h2>
+      <div class="row"><label for="nutWidth">Nut width (mm)</label><input id="nutWidth" type="number" min="38" max="52" step="0.1" value="44.5"></div>
+      <div class="row"><label for="length">Headstock length (mm)</label><input id="length" type="number" min="140" max="230" step="1" value="190"></div>
+      <div class="row"><label for="holeDia">Tuner hole Ø (mm)</label><input id="holeDia" type="number" min="5" max="14" step="0.1" value="10"></div>
+      <div class="buttons"><button class="btn primary" id="fitBtn" type="button">Fit view</button><button class="btn" id="resetBtn" type="button">Reset shape</button></div>
+      <p class="hint">Shape handles move in X and Y. The crown handle stays on the centerline. Tuner centers are independent so you can judge edge clearance while shaping.</p>
+      <div class="station-list">
+        <h2>Selected handle</h2>
+        <div id="selectedEditor"><p class="hint">Tap or drag a handle to edit its exact coordinates.</p></div>
+      </div>
+      <div class="status" id="status" aria-live="polite"></div>
+    </aside>
+    <section class="panel stage-panel">
+      <div class="stage-head"><h2>Shape workspace</h2><div class="legend"><span><i class="dot shape"></i>shape handle</span><span><i class="dot tuner"></i>tuner center</span></div></div>
+      <div class="svg-wrap">
+        <svg id="canvas" viewBox="-85 -18 170 235" role="img" aria-label="Interactive mirrored 3 plus 3 guitar headstock outline">
+          <g id="guides"></g><path id="shape" class="headstock"></path><g id="details"></g><g id="handles"></g>
+        </svg>
+      </div>
+    </section>
+  </div>
+</div>
+<script>
+(()=>{
+'use strict';
+const svg=document.getElementById('canvas'), shapeEl=document.getElementById('shape'), guides=document.getElementById('guides'), details=document.getElementById('details'), handles=document.getElementById('handles');
+const nutWidth=document.getElementById('nutWidth'), lengthInput=document.getElementById('length'), holeDia=document.getElementById('holeDia'), editor=document.getElementById('selectedEditor'), status=document.getElementById('status');
+const defaults={stations:[
+ {name:'Nut',x:-22.25,y:0,lockY:true},
+ {name:'Lower transition',x:-28,y:24},
+ {name:'Lower flare',x:-31,y:52},
+ {name:'Middle',x:-32,y:88},
+ {name:'Upper flare',x:-33,y:126},
+ {name:'Shoulder',x:-30,y:160},
+ {name:'Upper corner',x:-25,y:180},
+ {name:'Crown',x:0,y:190,crown:true}
+],tuners:[
+ {name:'Bass 1',x:-17,y:43},{name:'Bass 2',x:-18,y:91},{name:'Bass 3',x:-18,y:139},
+ {name:'Treble 1',x:17,y:43},{name:'Treble 2',x:18,y:91},{name:'Treble 3',x:18,y:139}
+]};
+let stations=[],tuners=[],selected=null,drag=null;
+function reset(){stations=defaults.stations.map(o=>({...o}));tuners=defaults.tuners.map(o=>({...o}));nutWidth.value=44.5;lengthInput.value=190;holeDia.value=10;selected=null;render();}
+function svgPoint(evt){const pt=svg.createSVGPoint();pt.x=evt.clientX;pt.y=evt.clientY;return pt.matrixTransform(svg.getScreenCTM().inverse());}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function catmull(points,steps=16){const out=[];for(let i=0;i<points.length-1;i++){const p0=points[Math.max(0,i-1)],p1=points[i],p2=points[i+1],p3=points[Math.min(points.length-1,i+2)];for(let j=0;j<steps;j++){const t=j/steps,t2=t*t,t3=t2*t;out.push({x:.5*((2*p1.x)+(-p0.x+p2.x)*t+(2*p0.x-5*p1.x+4*p2.x-p3.x)*t2+(-p0.x+3*p1.x-3*p2.x+p3.x)*t3),y:.5*((2*p1.y)+(-p0.y+p2.y)*t+(2*p0.y-5*p1.y+4*p2.y-p3.y)*t2+(-p0.y+3*p1.y-3*p2.y+p3.y)*t3)});}}out.push(points[points.length-1]);return out;}
+function buildPath(){const left=catmull(stations), right=left.slice(0,-1).map(p=>({x:-p.x,y:p.y})).reverse();const all=[...left,...right];return 'M '+all.map((p,i)=>`${p.x.toFixed(2)} ${p.y.toFixed(2)}`).join(' L ')+' Z';}
+function el(tag,attrs={}){const n=document.createElementNS('http://www.w3.org/2000/svg',tag);Object.entries(attrs).forEach(([k,v])=>n.setAttribute(k,v));return n;}
+function render(){const L=clamp(+lengthInput.value||190,140,230),nw=clamp(+nutWidth.value||44.5,38,52);stations[0].x=-nw/2;stations[0].y=0;stations[stations.length-1].y=L;stations[stations.length-1].x=0;shapeEl.setAttribute('d',buildPath());guides.replaceChildren();details.replaceChildren();handles.replaceChildren();
+ guides.append(el('line',{x1:0,y1:-10,x2:0,y2:L+10,class:'center'}));guides.append(el('line',{x1:-70,y1:0,x2:70,y2:0,class:'nut'}));
+ [0,50,100,150,L].forEach(y=>{guides.append(el('line',{x1:-62,y1:y,x2:62,y2:y,class:'guide'}));const t=el('text',{x:52,y:y-2,class:'dim'});t.textContent=Math.round(y)+' mm';guides.append(t);});
+ const dia=clamp(+holeDia.value||10,5,14);tuners.forEach((t,i)=>{details.append(el('circle',{cx:t.x,cy:t.y,r:dia/2,class:'tuner-hole'}));const txt=el('text',{x:t.x+(t.x<0?-8:8),y:t.y+3,class:'label','text-anchor':t.x<0?'end':'start'});txt.textContent=t.name;details.append(txt);const h=el('circle',{cx:t.x,cy:t.y,r:3.1,class:'tuner-handle'+(selected?.type==='tuner'&&selected.i===i?' selected':''),'data-type':'tuner','data-i':i,tabindex:'0'});handles.append(h);});
+ stations.forEach((p,i)=>{if(!p.crown){handles.append(el('line',{x1:p.x,y1:p.y,x2:-p.x,y2:p.y,class:'handle-line'}));handles.append(el('circle',{cx:-p.x,cy:p.y,r:2.7,class:'handle mirror'}));}const h=el('circle',{cx:p.x,cy:p.y,r:p.crown?4:3.5,class:'handle'+(p.crown?' crown':'')+(selected?.type==='station'&&selected.i===i?' selected':''),'data-type':'station','data-i':i,tabindex:'0'});handles.append(h);const txt=el('text',{x:p.crown?5:p.x-5,y:p.y-5,class:'label','text-anchor':p.crown?'start':'end'});txt.textContent=p.name;handles.append(txt);});
+ bindHandles();renderEditor();checkClearance();}
+ function bindHandles(){handles.querySelectorAll('[data-type]').forEach(h=>{h.addEventListener('pointerdown',e=>{e.preventDefault();h.setPointerCapture(e.pointerId);const type=h.dataset.type,i=+h.dataset.i;selected={type,i};drag={type,i};render();});h.addEventListener('pointermove',e=>{if(!drag||drag.type!==h.dataset.type||drag.i!==+h.dataset.i)return;const p=svgPoint(e);if(drag.type==='station'){const s=stations[drag.i];if(s.crown){s.y=clamp(p.y,160,230);lengthInput.value=s.y.toFixed(0);}else{s.x=clamp(p.x,-55,-10);if(!s.lockY)s.y=clamp(p.y,0,(+lengthInput.value||190)-4);}}else{const t=tuners[drag.i];t.x=clamp(p.x,-50,50);t.y=clamp(p.y,10,(+lengthInput.value||190)-12);}render();});h.addEventListener('pointerup',()=>drag=null);h.addEventListener('pointercancel',()=>drag=null);h.addEventListener('click',()=>{selected={type:h.dataset.type,i:+h.dataset.i};render();});h.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();const obj=h.dataset.type==='station'?stations[+h.dataset.i]:tuners[+h.dataset.i],step=e.shiftKey?5:1;if(e.key==='ArrowLeft')obj.x-=step;if(e.key==='ArrowRight')obj.x+=step;if(e.key==='ArrowUp')obj.y-=step;if(e.key==='ArrowDown')obj.y+=step;render();});});}
+ function renderEditor(){if(!selected){editor.innerHTML='<p class="hint">Tap or drag a handle to edit its exact coordinates.</p>';return;}const obj=selected.type==='station'?stations[selected.i]:tuners[selected.i];editor.innerHTML=`<div class="station"><strong>${obj.name}</strong><input id="editX" type="number" step="0.5" value="${obj.x.toFixed(1)}" aria-label="X coordinate"><input id="editY" type="number" step="0.5" value="${obj.y.toFixed(1)}" aria-label="Y coordinate"></div><p class="hint">X / Y in millimeters from centerline / nut.</p>`;const ex=document.getElementById('editX'),ey=document.getElementById('editY');if(obj.crown){ex.disabled=true;}if(obj.lockY){ey.disabled=true;}ex.addEventListener('change',()=>{obj.x=+ex.value||obj.x;render();});ey.addEventListener('change',()=>{obj.y=+ey.value||obj.y;if(obj.crown)lengthInput.value=obj.y;render();});}
+ function checkClearance(){let min=999;const outline=catmull(stations,25);tuners.forEach(t=>{const side=outline.map(p=>t.x>0?{x:-p.x,y:p.y}:p);side.forEach(p=>{const d=Math.hypot(t.x-p.x,t.y-p.y);if(d<min)min=d;});});const needed=(+holeDia.value||10)/2+4;status.textContent=min<needed?`Warning: tuner-to-edge clearance is tight (about ${Math.max(0,min-(+holeDia.value||10)/2).toFixed(1)} mm).`:'Shape is clear of the tuner holes.';status.className='status'+(min<needed?' warning':'');}
+ function fit(){const L=+lengthInput.value||190;svg.setAttribute('viewBox',`-72 -14 144 ${L+30}`);}
+ [nutWidth,lengthInput,holeDia].forEach(x=>x.addEventListener('input',render));document.getElementById('resetBtn').addEventListener('click',reset);document.getElementById('fitBtn').addEventListener('click',()=>{fit();render();});
+ reset();fit();
+})();
+</script>
+</body>
+</html>
