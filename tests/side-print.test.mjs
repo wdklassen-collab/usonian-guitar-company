@@ -97,7 +97,7 @@ test('route injects geometry before its sole print owner and fails closed if req
     assert.ok(!html.includes('developedPrintTiled'));
     assert.ok(!html.includes("addEventListener('click',printTiled)"));
     const localFetch=globalThis.fetch;
-    for(const missing of ['print-fix.js','developed-side.js','om-dxf.js']){
+    for(const missing of ['print-fix.js','developed-side.js','om-dxf.js','dread-pdf.js']){
       globalThis.fetch=url=>url.endsWith(missing)?new Response('',{status:503}):localFetch(url);
       assert.equal((await GET()).status,502);
     }

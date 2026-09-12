@@ -17,8 +17,8 @@
     let prevY=null;
 
     const xs=widthFn.sampleXs || Array.from({length:n+1},(_,i)=>p.bodyLength*i/n);
-    for(const x of xs){
-      const w=widthFn(x);
+    const points=widthFn.samplePoints || xs.map(x=>({x,w:widthFn(x)}));
+    for(const {x,w} of points){
       const d=depthFn(x);
       const y=-w/2;
 

@@ -59,6 +59,7 @@
   }
   function decorate(){
     if(window.usonianUsesMeasuredOM && window.usonianUsesMeasuredOM()) return;
+    if(window.usonianUsesMeasuredDreadnought && window.usonianUsesMeasuredDreadnought()) return;
     const svg=document.querySelector('svg[aria-label="Top view"]'); if(!svg||typeof readInputs!=='function')return;
     svg.querySelectorAll('[data-upper-curve-handle]').forEach(n=>n.remove()); const p=readInputs();
     makeHandle(svg,p,'upperBoutNeckRadius','Neck Radius',0,p.upperBoutPos,()=>neckT,v=>neckT=v);

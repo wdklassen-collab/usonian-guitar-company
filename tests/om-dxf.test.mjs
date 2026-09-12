@@ -46,7 +46,7 @@ test('OM edits and reset use the reference; Dreadnought uses the unchanged prior
  assert.equal(c.sampleGeometry(c.readInputs()).sideLength,before);
  assert.equal(e.get('lowerBoutFrontRadius').parentElement.hidden,true);
  c.applyUsonianSidePreset('dread14');const d=c.readInputs();
- assert.equal(d.bodyLength,513.3);assert.equal(d.waistPos,190);assert.equal(d.neckBlockWidth,63);
+ assert.equal(d.bodyLength,513.3);assert.equal(d.waistPos,168.11659529);assert.equal(d.neckBlockWidth,54.5260833);
  assert.equal(c.makeWidthFunction(d)(200),123,'delegates to original Dreadnought function');
  assert.equal(c.sampleGeometry(d).samples.length,481);
  assert.equal(e.get('lowerBoutFrontRadius').parentElement.hidden,false);
@@ -65,4 +65,24 @@ test('Back Radius remains editable and changes side depth without changing the b
  assert.equal(changed.samples.at(-1).d,p.tailDepth);
  assert.match(base,/<input id="backRadius" type="number" step="1">/);
  assert.ok(base.includes("addEventListener('input',render)"));
+});
+
+test('Dreadnought plan contour matches 771 mm template and preserves OM on switching',async()=>{
+ const {c,e}=setup(),omLength=c.sampleGeometry(c.readInputs()).sideLength;
+ vm.runInContext(await read('side-template/dread-pdf.js'),c);
+ c.applyUsonianSidePreset('dread14');const p=c.readInputs(),g=c.sampleGeometry(p),ref=c.usonianDreadnoughtReference;
+ assert.equal(p.bodyLength,513.3);
+ assert.ok(Math.abs(g.sideLength-771.09256)<0.002);
+ assert.equal(g.samples[0].x,0);assert.equal(g.samples[0].w,0);
+ assert.equal(g.samples[1].x,0);assert.ok(Math.abs(g.samples[1].s-p.neckBlockWidth/2)<1e-8);
+ for(const [x,y] of ref.samples)assert.ok(Math.abs(g.widthFn(x)-2*y)<0.0001);
+ assert.equal(e.get('lowerBoutFrontRadius').parentElement.hidden,true);
+ assert.ok(Math.abs(g.sideLength+p.neckExtension+p.tailExtension-821.09256)<0.002);
+ for(const svg of [c.topViewSVG(p,g,true),c.sideViewSVG(p,g,true),c.combinedSVG(p,g,true)])assert.ok(!/NaN|Infinity/.test(svg));
+ e.get('backRadius').value='3048';const changed=c.sampleGeometry(c.readInputs());
+ assert.equal(changed.sideLength,g.sideLength);assert.ok(changed.samples.some((s,i)=>Math.abs(s.d-g.samples[i].d)>0.1));
+ e.get('waistWidth').value='260';assert.notEqual(c.sampleGeometry(c.readInputs()).sideLength,g.sideLength);
+ e.get('resetBtn').listeners.click({preventDefault(){},stopImmediatePropagation(){}});assert.equal(c.sampleGeometry(c.readInputs()).sideLength,g.sideLength);
+ c.applyUsonianSidePreset('om14');assert.equal(c.sampleGeometry(c.readInputs()).sideLength,omLength);
+ console.log('Dreadnought developed length:',g.sideLength.toFixed(3),'mm; including extensions:',(g.sideLength+50).toFixed(3),'mm');
 });

@@ -15,9 +15,9 @@
       label:'Dreadnought',
       values:{
         bodyLength:513.3,backRadius:4572,neckDepth:95.3,tailDepth:120.7,
-        neckExtension:25,tailExtension:25,neckBlockWidth:63,tailBlockWidth:63,
-        upperBoutWidth:292.6,upperBoutPos:90,waistWidth:273.8,waistPos:190,
-        lowerBoutWidth:396.9,lowerBoutPos:381.0,
+        neckExtension:25,tailExtension:25,neckBlockWidth:54.5260833,tailBlockWidth:0,
+        upperBoutWidth:293.39804824,upperBoutPos:83.41313988,waistWidth:273.87561842,waistPos:168.11659529,
+        lowerBoutWidth:396.83620628,lowerBoutPos:379.32476986,
         upperBoutNeckRadius:165,upperBoutWaistRadius:155,lowerBoutFrontRadius:165,lowerBoutRadius:175
       }
     }
