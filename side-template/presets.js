@@ -5,7 +5,7 @@
       label:'OM',
       values:{
         bodyLength:485.8,backRadius:4572,neckDepth:79.3,tailDepth:104.5,
-        neckExtension:15,tailExtension:15,neckBlockWidth:18.9987,tailBlockWidth:0,
+        neckExtension:25,tailExtension:25,neckBlockWidth:18.9987,tailBlockWidth:0,
         upperBoutWidth:288.7096,upperBoutPos:81.0238,waistWidth:234.3475,waistPos:162.0503,
         lowerBoutWidth:381.1829,lowerBoutPos:349.5777,
         upperBoutNeckRadius:140,upperBoutWaistRadius:140,lowerBoutFrontRadius:140,lowerBoutRadius:140

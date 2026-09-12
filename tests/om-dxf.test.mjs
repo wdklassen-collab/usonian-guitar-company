@@ -22,6 +22,7 @@ function setup(){
 }
 test('DXF outside curve is preserved at 485.8 mm, with no neck-notch detour',()=>{
  const {c}=setup(),p=c.readInputs(),ref=c.usonianOMReference,g=c.sampleGeometry(p);
+ assert.equal(p.neckExtension,25);assert.equal(p.tailExtension,25);
  assert.equal(p.bodyLength,485.8);assert.equal(ref.samples[0][0],0);assert.equal(ref.samples.at(-1)[0],485.8);
  assert.ok(ref.samples.length>2900);
  for(let i=1;i<ref.samples.length;i++)assert.ok(ref.samples[i][0]>ref.samples[i-1][0],'single-valued, ordered half-outline');
@@ -36,7 +37,7 @@ test('DXF outside curve is preserved at 485.8 mm, with no neck-notch detour',()=
  for(const svg of [top,side,combined])assert.ok(!/NaN|Infinity/.test(svg));
  for(const s of g.samples.slice(1,10))assert.ok(top.includes((-s.w/2).toFixed(3))&&top.includes((s.w/2).toFixed(3)));
  assert.ok(side.includes(g.sideLength.toFixed(1)));
- console.log('OM developed length:',g.sideLength.toFixed(3),'mm; with default extensions:',(g.sideLength+30).toFixed(3),'mm');
+ console.log('OM developed length:',g.sideLength.toFixed(3),'mm; with default extensions:',(g.sideLength+50).toFixed(3),'mm');
 });
 test('OM edits and reset use the reference; Dreadnought uses the unchanged prior curve',()=>{
  const {c,e}=setup(),p=c.readInputs(),before=c.sampleGeometry(p).sideLength;
@@ -50,4 +51,18 @@ test('OM edits and reset use the reference; Dreadnought uses the unchanged prior
  assert.equal(c.sampleGeometry(d).samples.length,481);
  assert.equal(e.get('lowerBoutFrontRadius').parentElement.hidden,false);
  c.applyUsonianSidePreset('om14');assert.equal(c.sampleGeometry(c.readInputs()).sideLength,before);
+});
+
+test('Back Radius remains editable and changes side depth without changing the body contour',()=>{
+ const {c,e}=setup(),p=c.readInputs(),original=c.sampleGeometry(p);
+ e.get('backRadius').value='3048';
+ const changed=c.sampleGeometry(c.readInputs());
+ assert.equal(changed.sideLength,original.sideLength);
+ assert.deepEqual(changed.samples.map(s=>s.w),original.samples.map(s=>s.w));
+ assert.ok(changed.samples.some((s,i)=>Math.abs(s.d-original.samples[i].d)>0.1));
+ assert.notEqual(c.sideViewSVG(p,original,true),c.sideViewSVG(c.readInputs(),changed,true));
+ assert.equal(changed.samples[0].d,p.neckDepth);
+ assert.equal(changed.samples.at(-1).d,p.tailDepth);
+ assert.match(base,/<input id="backRadius" type="number" step="1">/);
+ assert.ok(base.includes("addEventListener('input',render)"));
 });

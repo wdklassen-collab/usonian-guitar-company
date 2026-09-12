@@ -14,6 +14,6 @@ Default stations from the neck end:
 | Lower bout | 349.5777 | 381.1829 |
 | Tail center | 485.8 | 0 |
 
-The neck-end width is the outside contour at the CNC notch mouth, not neck-block width. Developed length follows that outside edge to the tail center. It does not traverse the notch walls or notch floor, or cross the neck face. Default developed length is approximately 738.890 mm; two 15 mm extensions give a 768.890 mm blank. Extensions remain explicit allowances for joining and trimming.
+The neck-end width is the outside contour at the CNC notch mouth, not neck-block width. Developed length follows that outside edge to the tail center. It does not traverse the notch walls or notch floor, or cross the neck face. Default developed length is approximately 738.890 mm; two 25 mm extensions give a 788.890 mm blank. Extensions remain explicit allowances for joining and trimming.
 
 OM uses this measured curve rather than the old radius controls. Editable outline stations remap each measured segment; reset restores the measured default. The old radius controls remain available for Dreadnought. Developed geometry uses the arc-spaced sample locations for OM, avoiding length errors near vertical ends; the existing 480-interval sampling is retained for Dreadnought. Top, side, combined SVGs and tiled printing share the same geometry.
