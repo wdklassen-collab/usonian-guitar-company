@@ -8,10 +8,10 @@ const products = [
 ];
 // Every entry must have a matching app/<route>/route.ts; enforced by tests/tool-routes.test.mjs.
 const tools = [
-  ["Side Template Generator", "Create OM and Dreadnought side templates with adjustable back radius, SVG exports, and full-size tiled printing.", "/side-template/"],
   ["Fretboard Generator", "Lay out, save, print, and export custom fretboards.", "/fretboard-generator/"],
-  ["Radius Dish Creator", "Generate STL and CNC toolpaths for radius dishes.", "/radiusdishcreator/"],
   ["Neck Template Generator", "Create bolt-on neck side profiles, SVG files, and full-size paper templates.", "/neck-template/"],
+  ["Side Template Generator", "Create OM and Dreadnought side templates with adjustable back radius, SVG exports, and full-size tiled printing.", "/side-template/"],
+  ["Radius Dish Creator", "Generate STL and CNC toolpaths for radius dishes.", "/radiusdishcreator/"],
 ];
 const nutGuides = [
   ["Steel-string guitar", "usonian_steel_string_guitar_nut_spacing_guide"],
