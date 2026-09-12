@@ -12,7 +12,6 @@ const tools = [
   ["Fretboard Generator", "Lay out, save, print, and export custom fretboards.", "/fretboard-generator/"],
   ["Radius Dish Creator", "Generate STL and CNC toolpaths for radius dishes.", "/radiusdishcreator/"],
   ["Neck Template Generator", "Create bolt-on neck side profiles, SVG files, and full-size paper templates.", "/neck-template/"],
-  ["Headstock Shape Generator", "Sculpt a mirrored 3+3 headstock outline with draggable shape and tuner handles.", "/headstock-generator/"],
 ];
 const nutGuides = [
   ["Steel-string guitar", "usonian_steel_string_guitar_nut_spacing_guide"],
