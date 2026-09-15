@@ -34,6 +34,7 @@
               >Choose an Onshape DXF<input id="file" type="file" accept=".dxf"
             /></label>
             <p id="filename">No drawing loaded</p>
+            <p id="importStatus" role="status" aria-live="polite">Choose a DXF drawing to begin.</p>
             <label
               >Drawing units<select id="units">
                 <option value="auto">Read DXF units</option>
@@ -124,7 +125,7 @@
             <div id="status" role="status" aria-live="polite">
               Load a DXF or try the sample.
             </div>
-            <button id="generate" type="button">
+            <button id="generate" type="button" disabled>
               Validate & generate toolpaths</button
             ><label class="check"
               ><input id="review" type="checkbox" disabled />I checked

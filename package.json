@@ -14,7 +14,7 @@
     "validate:artifact": "bash scripts/validate-artifact.sh",
     "lint": "bash scripts/sites-env.sh -- eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "bash scripts/sites-env.sh -- drizzle-kit generate",
-    "build:cnc": "node scripts/build-cnc.mjs",
+    "build:cnc": "node scripts/build-cnc.mjs && node --test tests/cnc-import-ui.test.mjs",
     "test:cnc": "node --test tests/cnc-template.test.mjs",
     "prebuild": "npm run test:cnc && npm run build:cnc"
   },

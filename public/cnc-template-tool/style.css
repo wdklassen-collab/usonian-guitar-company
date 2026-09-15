@@ -277,3 +277,6 @@ footer {
     font-size: 12px;
   }
 }
+
+#importStatus {font-size: 13px; line-height: 1.6; overflow-wrap: anywhere;}
+#importStatus.error {color: #842819; border-left: 3px solid #a13021; padding-left: 12px;}

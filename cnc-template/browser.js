@@ -3,7 +3,9 @@ const $ = (id) => document.getElementById(id);
 let contours = null,
   job = null,
   source = "",
-  version = 0;
+  version = 0,
+  importError = "",
+  reading = false;
 const fields = {
   stock: [
     ["width", "Stock width (mm)"],
@@ -54,41 +56,62 @@ function invalidate() {
   $("summary").textContent = "Plan needs validation";
   $("moveInfo").textContent = "Generate a plan to inspect cutting depth.";
 }
-$("settings").addEventListener("input", () => {
+$("settings").addEventListener("submit", (event) => event.preventDefault());
+$("settings").addEventListener("input", (event) => {
+  if (["file", "units"].includes(event.target.id)) return;
   invalidate();
-  message("Settings changed. Validate again before exporting.");
+  message(importError || (reading ? "Reading DXF…" : contours ? "Settings changed. Validate again before exporting." : "Choose a DXF drawing to begin."), importError ? "error" : "");
 });
+function importMessage(text, type = "") {
+  $("importStatus").textContent = text;
+  $("importStatus").className = type;
+  message(text, type);
+}
 function parse() {
   invalidate();
   contours = null;
+  importError = "";
+  $("generate").disabled = true;
   try {
     contours = parseDXF(source, $("units").value);
-    message(
+    $("generate").disabled = false;
+    importMessage(
       `${contours.filter((c) => !c.hole).length} outside profile(s), ${contours.filter((c) => c.hole).length} hole(s). Ready to validate.`,
     );
   } catch (e) {
-    message(e.message, "error");
+    importError = e.message;
+    importMessage(importError, "error");
   }
 }
 $("file").addEventListener("change", async () => {
   const n = ++version;
   source = "";
   contours = null;
+  importError = "";
+  reading = false;
+  $("generate").disabled = true;
   invalidate();
   const f = $("file").files[0];
-  if (!f) return;
+  if (!f) { $("filename").textContent = "No drawing loaded"; importMessage("Choose a DXF drawing to begin."); return; }
+  $("filename").textContent = f.name;
   if (f.size > 2000000) {
-    message("DXF exceeds the 2 MB limit.", "error");
+    importError = "DXF exceeds the 2 MB limit.";
+    importMessage(importError, "error");
     return;
   }
-  $("filename").textContent = f.name;
+  reading = true;
+  importMessage("Reading DXF…");
   try {
     const text = await f.text();
     if (n !== version) return;
+    reading = false;
     source = text;
     parse();
   } catch (e) {
-    message(e.message, "error");
+    if (n !== version) return;
+    reading = false;
+    importError = `Could not read this file: ${e.message}`;
+    importMessage(importError, "error");
   }
 });
 $("units").addEventListener("change", () => {
@@ -96,6 +119,10 @@ $("units").addEventListener("change", () => {
 });
 $("demo").addEventListener("click", () => {
   version++;
+  reading = false;
+  importError = "";
+  $("generate").disabled = false;
+  importMessage("Sample drawing loaded.");
   source = "";
   invalidate();
   for (const [k, v] of Object.entries(defaults)) $(k).value = v;
@@ -121,7 +148,7 @@ $("demo").addEventListener("click", () => {
 function generate() {
   invalidate();
   if (!contours) {
-    message("Load a supported DXF first.", "error");
+    importMessage(importError || (reading ? "Reading DXF… Please wait." : "Choose a DXF drawing to begin."), importError ? "error" : "");
     return;
   }
   try {
