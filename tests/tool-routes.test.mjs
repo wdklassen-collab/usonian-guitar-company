@@ -13,8 +13,8 @@ test("every homepage tool link has a deployed application route", async () => {
 
   for (const route of routes) {
     await assert.doesNotReject(
-      access(path.join("app", route, "route.ts")),
-      `Homepage tool /${route}/ is missing app/${route}/route.ts`,
+      Promise.any([access(path.join("app", route, "route.ts")), access(path.join("app", route, "page.tsx"))]),
+      `Homepage tool /${route}/ is missing an application route`,
     );
   }
 });

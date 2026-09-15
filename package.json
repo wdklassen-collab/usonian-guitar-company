@@ -13,10 +13,15 @@
     "test": "npm run build && node --test tests/rendered-html.test.mjs",
     "validate:artifact": "bash scripts/validate-artifact.sh",
     "lint": "bash scripts/sites-env.sh -- eslint . --ignore-pattern dist --ignore-pattern .next",
-    "db:generate": "bash scripts/sites-env.sh -- drizzle-kit generate"
+    "db:generate": "bash scripts/sites-env.sh -- drizzle-kit generate",
+    "build:cnc": "node scripts/build-cnc.mjs",
+    "test:cnc": "node --test tests/cnc-template.test.mjs",
+    "prebuild": "npm run test:cnc && npm run build:cnc"
   },
   "dependencies": {
+    "clipper-lib": "6.4.2",
     "drizzle-orm": "0.45.2",
+    "dxf-parser": "1.1.2",
     "next": "16.2.6",
     "react": "19.2.6",
     "react-dom": "19.2.6"
@@ -30,6 +35,7 @@
     "@vitejs/plugin-react": "6.0.2",
     "@vitejs/plugin-rsc": "0.5.26",
     "drizzle-kit": "0.31.10",
+    "esbuild": "0.28.0",
     "eslint": "9.39.4",
     "eslint-config-next": "16.2.6",
     "react-server-dom-webpack": "19.2.6",

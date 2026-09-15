@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CNC Template Tool · Usonian Guitar Co.</title>
+    <link rel="stylesheet" href="/cnc-template-tool/style.css" />
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="/"
+        ><img src="/usonian-shield-diamond.svg" alt="" />Usonian Guitar Co.</a
+      ><a href="/#tools">All tools ↗</a>
+    </header>
+    <main>
+      <p class="eyebrow">Free builder resources / 2D machining</p>
+      <h1>CNC Template <em>Tool.</em></h1>
+      <p class="intro">
+        From a flat Onshape drawing to a shop-ready plan. Import a DXF, check
+        the cutter path, and export GRBL G-code for UGS.
+      </p>
+      <div class="privacy">
+        LOCAL BY DESIGN
+        <span
+          >Your drawing stays in this browser. No upload, account, or cloud
+          processing.</span
+        >
+      </div>
+      <div class="workspace">
+        <form id="settings">
+          <section>
+            <h2><b>01</b> Drawing</h2>
+            <label class="upload"
+              >Choose an Onshape DXF<input id="file" type="file" accept=".dxf"
+            /></label>
+            <p id="filename">No drawing loaded</p>
+            <label
+              >Drawing units<select id="units">
+                <option value="auto">Read DXF units</option>
+                <option value="mm">Millimeters</option>
+                <option value="inch">Inches</option>
+              </select></label
+            ><button type="button" id="demo" class="secondary">
+              Try a sample template
+            </button>
+            <p class="hint">
+              Export one flat XY sketch at Z=0. Lines, arcs, circles, and closed
+              polylines are supported. Convert splines in CAD. Dimensions, text,
+              blocks, and nested islands must be removed.
+            </p>
+          </section>
+          <section>
+            <h2><b>02</b> Stock & zero</h2>
+            <div id="stock" class="fields"></div>
+            <label
+              >XY zero (G54)<select id="zero">
+                <option value="corner">Stock lower-left corner</option>
+                <option value="center">Stock center</option>
+              </select></label
+            ><label
+              >Z zero (G54)<select id="zZero">
+                <option value="top">Stock top</option>
+                <option value="bottom">Stock bottom / spoilboard</option>
+              </select></label
+            >
+            <p class="hint">
+              The drawing’s lower-left bounds sit at the margin from the stock’s
+              lower-left edge. +X right, +Y up. All machining values use
+              millimeters.
+            </p>
+          </section>
+          <section>
+            <h2><b>03</b> Cutter & cutting</h2>
+            <div id="cutting" class="fields"></div>
+            <p class="hint">
+              Example values are not material presets. Use a center-cutting end
+              mill and verify feeds, RPM, travel, and spindle control for your
+              Genmitsu model. Maximum RPM must match your GRBL $30 setting.
+            </p>
+          </section>
+          <section>
+            <h2><b>04</b> Holding tabs</h2>
+            <div id="holding" class="fields"></div>
+            <p class="hint">
+              Evenly spaced tabs retain outside parts and hole waste slugs.
+              Small holes fully swept by the cutter need no tabs. Other contours
+              that cannot accommodate tabs are blocked. Preview tab locations
+              and keep clamps outside every cutting path.
+            </p>
+          </section>
+        </form>
+        <div class="preview-column">
+          <section class="preview-panel">
+            <div class="preview-title">
+              <h2>Toolpath preview</h2>
+              <span id="summary">Load a drawing to begin</span>
+            </div>
+            <svg
+              id="preview"
+              role="img"
+              aria-label="Stock, contours, cutter paths, rapid moves, and holding tabs"
+              viewBox="0 0 180 100"
+            ></svg>
+            <div class="legend">
+              <span>— Drawing</span><span class="copper">— Cutter center</span
+              ><span class="blue">┄ Rapid at safe Z</span
+              ><span class="sage">● Holding tabs</span>
+            </div>
+            <label
+              >Inspect move
+              <input
+                type="range"
+                id="scrub"
+                min="0"
+                max="0"
+                value="0"
+                disabled /></label
+            ><output id="moveInfo"
+              >Generate a plan to inspect cutting depth.</output
+            >
+          </section>
+          <section class="export-panel">
+            <p class="eyebrow">05 / Review & export</p>
+            <div id="status" role="status" aria-live="polite">
+              Load a DXF or try the sample.
+            </div>
+            <button id="generate" type="button">
+              Validate & generate toolpaths</button
+            ><label class="check"
+              ><input id="review" type="checkbox" disabled />I checked
+              dimensions, tab placement, stock zero, workholding clearance, and
+              my machine’s travel and spindle settings.</label
+            ><button id="download" type="button" disabled>
+              Download GRBL G-code (.nc)
+            </button>
+            <p class="hint">
+              Open the .nc file in Universal Gcode Sender on your Mac. Set the
+              matching G54 zero, inspect the visualizer, run GRBL check mode
+              ($C), then perform an air cut above the stock before cutting.
+              Preview validates planned geometry; it cannot detect your clamps
+              or machine setup.
+            </p>
+            <details>
+              <summary>What this version checks</summary>
+              <p>
+                Closed, non-crossing contours; outside/hole classification;
+                tool-radius compensation; unreachable features within 0.03 mm;
+                cutter-to-contour clearance; cutter envelope inside stock; safe
+                retract height above the entered fixture height; pass depths and
+                holding tabs. Arc approximation tolerance is 0.0025 mm.
+              </p>
+              <p>
+                Conventional milling with vertical plunges. Holes are contour
+                cuts with retained slugs, not drilling cycles or pockets.
+                Pockets, V-carving, and 3D STL machining are reserved for a
+                later version.
+              </p>
+            </details>
+          </section>
+        </div>
+      </div>
+    </main>
+    <footer>
+      Usonian Guitar Co. · Practical tools for the workbench.
+      <a href="/#tools">Explore all tools ↗</a>
+    </footer>
+    <script type="module" src="/cnc-template-tool/app.js"></script>
+  </body>
+</html>
