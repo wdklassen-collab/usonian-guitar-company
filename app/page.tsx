@@ -8,7 +8,6 @@ const products = [
 ];
 // Every entry must have a matching application route; enforced by tests/tool-routes.test.mjs.
 const tools = [
-  ["CNC Template Tool", "Import flat DXF profiles, preview compensated toolpaths, and export GRBL G-code locally in your browser.", "/cnc-template/"],
   ["Fret Spacing Calculator", "Calculate precise fret positions from the nut and spacing between consecutive frets.", "/fret-spacing-calculator/"],
   ["Fretboard Generator", "Lay out, save, print, and export custom fretboards.", "/fretboard-generator/"],
   ["Neck Template Generator", "Create bolt-on neck side profiles, SVG files, and full-size paper templates.", "/neck-template/"],
