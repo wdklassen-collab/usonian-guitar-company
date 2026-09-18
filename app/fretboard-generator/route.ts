@@ -1,4 +1,4 @@
-const SOURCE = "https://raw.githubusercontent.com/wdklassen-collab/usonian-web-tools/main/fretboard/index.html";
+const SOURCE = "https://raw.githubusercontent.com/wdklassen-collab/usonian-guitar-company/main/public/fretboard-generator/index.html";
 
 export async function GET() {
   const response = await fetch(SOURCE, { cache: "no-store" });
