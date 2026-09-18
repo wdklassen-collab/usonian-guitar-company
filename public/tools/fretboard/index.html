@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Usonian Fretboard Generator v4.3.0</title>
+<title>Usonian Fretboard Generator v4.3.1</title>
 <style>
 :root{--walnut:#4B2E15;--copper:#C16E36;--tan:#E6D5B8;--charcoal:#2E2E2E;--paper:#fffdf8;--green:#2e6b3f}
 *{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--charcoal);background:#f4f1ea}header{background:var(--walnut);color:#fff;padding:18px 22px;border-bottom:5px solid var(--copper)}header h1{margin:0;font-size:1.45rem}header p{margin:6px 0 0}main{display:grid;grid-template-columns:minmax(320px,410px) 1fr;gap:18px;max-width:1450px;margin:auto;padding:18px}.panel{background:var(--paper);border:1px solid #d4cec2;border-radius:8px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.05)}.section-title{margin:4px 0 12px;font-size:1rem;color:var(--walnut);border-bottom:1px solid #ddd;padding-bottom:7px}.field{display:grid;grid-template-columns:1fr 140px;align-items:center;gap:10px;margin-bottom:12px}label{font-weight:700;font-size:.93rem}input,select,button{font:inherit;border:1px solid #aaa;border-radius:5px;padding:8px 9px}button{border:none;color:#fff;background:var(--copper);cursor:pointer;font-weight:700;padding:10px 12px}button.secondary{background:var(--charcoal)}button.green{background:var(--green)}button.light{background:#777}button.danger{background:#9b1c1c}.buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.buttons.one{grid-template-columns:1fr}.check{display:flex;gap:8px;align-items:center;margin:9px 0}.check input{width:auto}#message,#saveMessage{min-height:22px;margin-top:9px;font-weight:700;font-size:.9rem}.ok{color:#27632a}.error{color:#9b1c1c}.note{margin-top:14px;padding:11px;background:var(--tan);border-radius:5px;font-size:.84rem;line-height:1.45}.saved-box{background:#f7f4ed;border:1px solid #ddd;border-radius:6px;padding:12px;margin-bottom:18px}.saved-row{display:grid;grid-template-columns:1fr 120px;gap:8px;margin-bottom:8px}.saved-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.summary{display:grid;grid-template-columns:repeat(4,minmax(100px,1fr));gap:8px;margin-bottom:12px}.summary div{background:#f7f4ed;border-left:4px solid var(--copper);padding:8px 10px}.summary small{display:block;color:#666}.summary strong{display:block;margin-top:3px}#previewWrap{min-height:720px;overflow:auto;border:1px solid #ccc;border-radius:6px;background:#fff}#preview{display:block;width:100%;min-width:500px;min-height:700px}footer{max-width:1450px;margin:0 auto 24px;padding:0 18px;text-align:center;color:#777;font-size:.86rem}@media(max-width:900px){main{grid-template-columns:1fr}.summary{grid-template-columns:repeat(2,1fr)}}
@@ -30,7 +30,7 @@
 </style>
 </head>
 <body>
-<header><h1>USONIAN GUITAR CO. — FRETBOARD GENERATOR</h1><p><strong>Version 4.3.0</strong> • Saved Fretboards • Easel SVG Export</p></header>
+<header><h1>USONIAN GUITAR CO. — FRETBOARD GENERATOR</h1><p><strong>Version 4.3.1</strong> • Saved Fretboards • Easel SVG Export</p></header>
 <main>
 <section class="panel">
 <h2 class="section-title">Saved Fretboards</h2>
@@ -66,10 +66,12 @@ Print in <strong>Portrait</strong> orientation at <strong>100% / Actual Size</st
 
 <h2 class="section-title" style="margin-top:18px">UGS / GRBL .NC File</h2>
 <div class="field"><label for="ncDepth">Fret slot depth (mm)</label><input id="ncDepth" type="number" min="0.1" step="0.1" value="2.0"></div>
-<div class="field"><label for="ncCutter">Fret slot width / cutter (mm)</label><input id="ncCutter" type="number" min="0.1" step="0.05" value="0.6"></div>
+<div class="field"><label for="outlineBit">Outline bit diameter (mm)</label><input id="outlineBit" type="number" min="0.1" step="0.05" value="6.35"></div>
+<div class="field"><label for="radiusBit">Radius bit diameter (mm)</label><input id="radiusBit" type="number" min="0.1" step="0.05" value="12.70"></div>
+<div class="field"><label for="ncCutter">Fret slot bit diameter (mm)</label><input id="ncCutter" type="number" min="0.1" step="0.05" value="0.60"></div>
 <div class="field"><label for="ncRadius">Fretboard radius (ft)</label><input id="ncRadius" type="number" min="1" step="0.5" value="15"></div>
 <div class="buttons one"><button id="downloadNC" class="green">Download UGS .NC</button></div>
-<div class="note"><strong>UGS zero:</strong> X0 = fretboard centerline, Y0 = nut, Z0 = top of the fretboard at the centerline. The toolpath follows the entered fretboard radius so slot depth stays consistent across the curved surface. Default slot depth is 2.0 mm, cutter/slot width is 0.6 mm, and radius is 15 ft. The .NC file uses millimeters, 0.5 mm stepdowns, a 3 mm safe Z, 100 mm/min cutting feed, and 60 mm/min plunge feed. Spindle start/stop commands are intentionally omitted.</div>
+<div class="note"><strong>UGS zero:</strong> X0 = fretboard centerline, Y0 = nut, Z0 = top of the fretboard at the centerline. The toolpath follows the entered fretboard radius so slot depth stays consistent across the curved surface. Defaults: 2.0 mm fret slot depth, 6.35 mm (1/4 in) outline bit, 12.70 mm (1/2 in) radius bit, 0.60 mm fret slot bit, and 15 ft fretboard radius. The .NC file uses millimeters, 0.5 mm stepdowns, a 3 mm safe Z, 100 mm/min cutting feed, and 60 mm/min plunge feed. Spindle start/stop commands are intentionally omitted.</div>
 
 <h2 class="section-title" style="margin-top:18px">Easel SVG Files</h2>
 <div class="field"><label for="exportName">Export filename</label><input id="exportName" type="text" placeholder="Uses saved fretboard name"></div>
@@ -82,14 +84,14 @@ Print in <strong>Portrait</strong> orientation at <strong>100% / Actual Size</st
 <section class="panel"><div class="summary"><div><small>12th fret</small><strong id="s12">—</strong></div><div><small>14th fret</small><strong id="s14">—</strong></div><div><small>Board length</small><strong id="sLength">—</strong></div><div><small>End width</small><strong id="sEndWidth">—</strong></div></div><div id="previewWrap"><svg id="preview" xmlns="http://www.w3.org/2000/svg"></svg></div></section>
 </main>
 <div id="printArea" aria-hidden="true"></div>
-<footer>Usonian Guitar Co. • Fretboard Generator • Version 4.3.0 • Last Updated 2026-09-17</footer>
+<footer>Usonian Guitar Co. • Fretboard Generator • Version 4.3.1 • Last Updated 2026-09-17</footer>
 <script>
 (()=>{"use strict";
-const VERSION="4.3.0", STORAGE_KEY="usonian-fretboard-projects-v1", $=id=>document.getElementById(id);let files={slots:"",outline:"",combined:""};
+const VERSION="4.3.1", STORAGE_KEY="usonian-fretboard-projects-v1", $=id=>document.getElementById(id);let files={slots:"",outline:"",combined:""};
 const factor=()=>$("units").value==="in"?25.4:1;const num=id=>Number($(id).value);const fretPos=(s,n)=>s*(1-Math.pow(2,-n/12));
 function widthAt(pos,nut,w14,f14){return Math.abs(w14-nut)<1e-9?nut:nut+(w14-nut)*(pos/f14)}
 function shown(mm){const inch=$("units").value==="in",v=inch?mm/25.4:mm;return v.toFixed(inch?4:2)+" "+(inch?"in":"mm")}
-function ncParameters(){const depth=num("ncDepth"),cutter=num("ncCutter"),radiusFt=num("ncRadius");if(![depth,cutter,radiusFt].every(Number.isFinite))throw Error("NC settings must be valid numbers.");if(depth<=0||cutter<=0||radiusFt<=0)throw Error("NC depth, cutter width, and radius must be greater than zero.");return{depth,cutter,radiusMm:radiusFt*304.8,radiusFt}}
+function ncParameters(){const depth=num("ncDepth"),outlineBit=num("outlineBit"),radiusBit=num("radiusBit"),cutter=num("ncCutter"),radiusFt=num("ncRadius");if(![depth,outlineBit,radiusBit,cutter,radiusFt].every(Number.isFinite))throw Error("NC settings must be valid numbers.");if(depth<=0||outlineBit<=0||radiusBit<=0||cutter<=0||radiusFt<=0)throw Error("NC depth, bit diameters, and radius must be greater than zero.");return{depth,outlineBit,radiusBit,cutter,radiusMm:radiusFt*304.8,radiusFt}}
 function radiusSag(x,r){const ax=Math.abs(x);if(ax>=r)throw Error("Fretboard radius is too small for the generated slot width.");return r-Math.sqrt(r*r-ax*ax)}
 function buildNC(){
   const p=parameters(),ncp=ncParameters(),f14=fretPos(p.scale,14);
@@ -99,7 +101,9 @@ function buildNC(){
     "(UGS / GRBL fret slot toolpath)",
     "(Origin: X0=centerline, Y0=nut, Z0=top surface at centerline)",
     "(Slot depth: "+ncp.depth.toFixed(3)+" mm)",
-    "(Cutter / slot width: "+ncp.cutter.toFixed(3)+" mm)",
+    "(Fret slot bit: "+ncp.cutter.toFixed(3)+" mm)",
+    "(Outline bit: "+ncp.outlineBit.toFixed(3)+" mm)",
+    "(Radius bit: "+ncp.radiusBit.toFixed(3)+" mm)",
     "(Fretboard radius: "+ncp.radiusFt.toFixed(2)+" ft)",
     "(Spindle commands omitted - start spindle before running)",
     "G21","G90","G17","G94","G0 Z"+safeZ.toFixed(3)
@@ -208,8 +212,8 @@ function state(){return{units:$("units").value,scale:$("scale").value,nutWidth:$
     pageOverlap:$("pageOverlap").value,
     printFretNumbers:$("printFretNumbers").checked,
     printCenterline:$("printCenterline").checked,savedAt:new Date().toISOString(),exportName:$("exportName").value,
-    ncDepth:$("ncDepth").value,ncCutter:$("ncCutter").value,ncRadius:$("ncRadius").value,version:VERSION}}
-function apply(s){["units","scale","nutWidth","width14","frets","extension","overrun","nutThickness","exportName","ncDepth","ncCutter","ncRadius"].forEach(id=>{if(s[id]!==undefined)$(id).value=s[id]});if(s.nutline!==undefined)$("nutline").checked=s.nutline;if(s.centerline!==undefined)$("centerline").checked=s.centerline;render()}
+    ncDepth:$("ncDepth").value,outlineBit:$("outlineBit").value,radiusBit:$("radiusBit").value,ncCutter:$("ncCutter").value,ncRadius:$("ncRadius").value,version:VERSION}}
+function apply(s){["units","scale","nutWidth","width14","frets","extension","overrun","nutThickness","exportName","ncDepth","outlineBit","radiusBit","ncCutter","ncRadius"].forEach(id=>{if(s[id]!==undefined)$(id).value=s[id]});if(s.nutline!==undefined)$("nutline").checked=s.nutline;if(s.centerline!==undefined)$("centerline").checked=s.centerline;render()}
 function refresh(selected=""){const p=getProjects(),s=$("savedProjects");s.innerHTML='<option value="">— Saved fretboards —</option>';Object.keys(p).sort().forEach(n=>{const o=document.createElement("option");o.value=n;o.textContent=n;s.appendChild(o)});if(selected&&p[selected])s.value=selected}
 function saveProject(){const n=$("projectName").value.trim(),m=$("saveMessage");if(!n){m.className="error";m.textContent="Enter a name for this fretboard.";return}const p=getProjects();p[n]=state();setProjects(p);refresh(n);m.className="ok";m.textContent=`Saved "${n}".`}
 function loadProject(){const n=$("savedProjects").value,m=$("saveMessage"),p=getProjects();if(!n||!p[n]){m.className="error";m.textContent="Choose a saved fretboard first.";return}$("projectName").value=n;apply(p[n]);m.className="ok";m.textContent=`Loaded "${n}".`}
@@ -328,7 +332,7 @@ function printTemplate(){
 
 $("generate").onclick=render;
 $("printTemplate").onclick=printTemplate;$("downloadNC").onclick=saveNC;$("downloadSlots").onclick=()=>saveFile(files.slots,"Fret Slots");$("downloadOutline").onclick=()=>saveFile(files.outline,"Outline");$("downloadCombined").onclick=()=>saveFile(files.combined,"Combined");$("saveProject").onclick=saveProject;$("loadProject").onclick=loadProject;$("renameProject").onclick=renameProject;$("duplicateProject").onclick=duplicateProject;$("deleteProject").onclick=deleteProject;
-$("units").addEventListener("change",()=>{const toIn=$("units").value==="in";["scale","nutWidth","width14","extension","overrun","nutThickness"].forEach(id=>{const e=$(id),v=Number(e.value);if(Number.isFinite(v))e.value=(toIn?v/25.4:v*25.4).toFixed(toIn?4:2)});render()});["scale","nutWidth","width14","frets","extension","overrun","nutThickness"].forEach(id=>$(id).addEventListener("input",render));["ncDepth","ncCutter","ncRadius"].forEach(id=>$(id).addEventListener("input",()=>{$("message").className="ok";$("message").textContent="UGS .NC settings updated.";}));["nutline","centerline"].forEach(id=>$(id).addEventListener("change",render));refresh();render();
+$("units").addEventListener("change",()=>{const toIn=$("units").value==="in";["scale","nutWidth","width14","extension","overrun","nutThickness"].forEach(id=>{const e=$(id),v=Number(e.value);if(Number.isFinite(v))e.value=(toIn?v/25.4:v*25.4).toFixed(toIn?4:2)});render()});["scale","nutWidth","width14","frets","extension","overrun","nutThickness"].forEach(id=>$(id).addEventListener("input",render));["ncDepth","outlineBit","radiusBit","ncCutter","ncRadius"].forEach(id=>$(id).addEventListener("input",()=>{$("message").className="ok";$("message").textContent="UGS .NC settings updated.";}));["nutline","centerline"].forEach(id=>$(id).addEventListener("change",render));refresh();render();
 })();
 </script>
 </body>
