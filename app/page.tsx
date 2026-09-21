@@ -16,6 +16,7 @@ const tools = [
 ];
 const nutGuides = [
   ["Steel-string guitar", "usonian_steel_string_guitar_nut_spacing_guide"],
+  ["Four-string bass guitar", "usonian_4_string_bass_nut_spacing_guide"],
   ["Classical / nylon guitar", "usonian_classical_nylon_guitar_nut_spacing_guide"],
   ["Ukulele", "usonian_ukulele_nut_spacing_guide"],
   ["Mandolin", "usonian_mandolin_nut_spacing_guide"],
