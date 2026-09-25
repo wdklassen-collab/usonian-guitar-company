@@ -68,7 +68,7 @@
       <line x1="${sideL}" y1="${topY}" x2="${sideL}" y2="${p.tailDepth}" stroke="#9b5f36"/>
       <text x="3" y="${p.neckDepth-4}" font-size="8" fill="#6d655f">Neck ${p.neckDepth.toFixed(1)} mm</text>
       <text x="${Math.max(10,sideL-70)}" y="${p.tailDepth-4}" font-size="8" fill="#6d655f">Tail ${p.tailDepth.toFixed(1)} mm</text>
-      <text x="${sideL/2}" y="${maxD+13}" text-anchor="middle" font-size="8" fill="#6d655f">Developed side length ${sideL.toFixed(1)} mm</text>`;
+      <text x="${sideL/2}" y="${maxD+13}" text-anchor="middle" font-size="8" fill="#6d655f">Top edge length ${(sideL+p.neckExtension+p.tailExtension).toFixed(1)} mm</text>`;
 
     if(standalone){
       return `<svg xmlns="http://www.w3.org/2000/svg" width="${vbW}mm" height="${vbH}mm" viewBox="${vbX} ${vbY} ${vbW} ${vbH}"><rect x="${vbX}" y="${vbY}" width="${vbW}" height="${vbH}" fill="white"/>${body}</svg>`;
@@ -106,7 +106,7 @@
       const p=window.readInputs();
       const g=window.sampleGeometry(p);
       const stat=document.getElementById('statDepth');
-      if(stat) stat.textContent=`Depth: ${p.neckDepth.toFixed(1)} → ${p.tailDepth.toFixed(1)} mm · Side: ${g.sideLength.toFixed(1)} mm`;
+      if(stat) stat.textContent=`Depth: ${p.neckDepth.toFixed(1)} → ${p.tailDepth.toFixed(1)} mm · Top edge: ${(g.sideLength+p.neckExtension+p.tailExtension).toFixed(1)} mm`;
     };
     window.render();
   }
