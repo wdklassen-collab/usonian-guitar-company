@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Usonian Fretboard Generator v4.4.3</title>
+<title>Usonian Fretboard Generator v4.5.0</title>
 <style>
 :root{--walnut:#4B2E15;--copper:#C16E36;--tan:#E6D5B8;--charcoal:#2E2E2E;--paper:#fffdf8;--green:#2e6b3f}
 *{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--charcoal);background:#f4f1ea}header{background:var(--walnut);color:#fff;padding:18px 22px;border-bottom:5px solid var(--copper)}header h1{margin:0;font-size:1.45rem}header p{margin:6px 0 0}main{display:grid;grid-template-columns:minmax(320px,410px) 1fr;gap:18px;max-width:1450px;margin:auto;padding:18px}.panel{background:var(--paper);border:1px solid #d4cec2;border-radius:8px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.05)}.section-title{margin:4px 0 12px;font-size:1rem;color:var(--walnut);border-bottom:1px solid #ddd;padding-bottom:7px}.field{display:grid;grid-template-columns:1fr 140px;align-items:center;gap:10px;margin-bottom:12px}label{font-weight:700;font-size:.93rem}input,select,button{font:inherit;border:1px solid #aaa;border-radius:5px;padding:8px 9px}button{border:none;color:#fff;background:var(--copper);cursor:pointer;font-weight:700;padding:10px 12px}button.secondary{background:var(--charcoal)}button.green{background:var(--green)}button.light{background:#777}button.danger{background:#9b1c1c}.buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.buttons.one{grid-template-columns:1fr}.check{display:flex;gap:8px;align-items:center;margin:9px 0}.check input{width:auto}#message,#saveMessage{min-height:22px;margin-top:9px;font-weight:700;font-size:.9rem}.ok{color:#27632a}.error{color:#9b1c1c}.note{margin-top:14px;padding:11px;background:var(--tan);border-radius:5px;font-size:.84rem;line-height:1.45}.saved-box{background:#f7f4ed;border:1px solid #ddd;border-radius:6px;padding:12px;margin-bottom:18px}.saved-row{display:grid;grid-template-columns:1fr 120px;gap:8px;margin-bottom:8px}.saved-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.summary{display:grid;grid-template-columns:repeat(4,minmax(100px,1fr));gap:8px;margin-bottom:12px}.summary div{background:#f7f4ed;border-left:4px solid var(--copper);padding:8px 10px}.summary small{display:block;color:#666}.summary strong{display:block;margin-top:3px}#previewWrap{min-height:720px;overflow:auto;border:1px solid #ccc;border-radius:6px;background:#fff}#preview{display:block;width:100%;min-width:500px;min-height:700px}footer{max-width:1450px;margin:0 auto 24px;padding:0 18px;text-align:center;color:#777;font-size:.86rem}@media(max-width:900px){main{grid-template-columns:1fr}.summary{grid-template-columns:repeat(2,1fr)}}
@@ -30,7 +30,7 @@
 </style>
 </head>
 <body>
-<header><h1>USONIAN GUITAR CO. — FRETBOARD GENERATOR</h1><p><strong>Version 4.4.3</strong> • Saved Fretboards • Easel SVG Export</p></header>
+<header><h1>USONIAN GUITAR CO. — FRETBOARD GENERATOR</h1><p><strong>Version 4.5.0</strong> • Saved Fretboards • Easel 3D STL Export</p></header>
 <main>
 <section class="panel">
 <h2 class="section-title">Saved Fretboards</h2>
@@ -64,13 +64,19 @@
 Print in <strong>Portrait</strong> orientation at <strong>100% / Actual Size</strong>. Do not use “Fit to Page.” The template includes registration marks and overlapping alignment areas so the pages can be taped together accurately.
 </div>
 
-<h2 class="section-title" style="margin-top:18px">UGS / GRBL .NC File</h2>
+<h2 class="section-title" style="margin-top:18px">3D Model &amp; CNC Settings</h2>
 <div class="field"><label for="ncDepth">Fret slot depth (mm)</label><input id="ncDepth" type="number" min="0.1" step="0.1" value="2.0"></div>
 <div class="field"><label for="outlineBit">Outline bit diameter (mm)</label><input id="outlineBit" type="number" min="0.1" step="0.05" value="6.35"></div>
 <div class="field"><label for="radiusBit">Radius bit diameter (mm)</label><input id="radiusBit" type="number" min="0.1" step="0.05" value="6.35"></div>
 <div class="field"><label for="ncCutter">Fret slot bit diameter (mm)</label><input id="ncCutter" type="number" min="0.1" step="0.05" value="0.60"></div>
 <div class="field"><label for="ncRadius">Fretboard radius (in)</label><input id="ncRadius" type="number" min="1" step="0.5" value="15"></div>
 <div class="field"><label for="outlineDepth">Outline cut depth / board thickness (mm)</label><input id="outlineDepth" type="number" min="0.1" step="0.1" value="6.0"></div>
+<h2 class="section-title" style="margin-top:18px">Easel 3D STL</h2>
+<div class="check"><input id="stlSlots" type="checkbox" checked><label for="stlSlots">Include fret slots in the 3D model</label></div>
+<div class="buttons one"><button id="downloadSTL" class="green">Download Fretboard STL for Easel</button></div>
+<div class="note">A solid fretboard with a radiused top, flat bottom, and tapered outline. The nut is at the top. Thickness, radius, slot width, and slot depth use the settings above. Slot width uses the fret slot bit diameter. STL slots run through the sides; for an inset-slot design, uncheck slots and use the separate slot export.<br><br><strong>In Easel:</strong> choose <strong>Import 3D STL File</strong>, use millimeters, and set your material large enough for the board. Easel generates its own carving paths. If your finishing bit is wider than the slots, uncheck slots and cut them separately with the correct slot bit.</div>
+<h2 class="section-title" style="margin-top:18px">UGS / GRBL .NC Files</h2>
+<div class="note">These .NC files are for UGS / GRBL. For Easel, use the STL download above.</div>
 <div class="buttons one"><button id="downloadRadiusNC" class="green">1. Download Radius .NC</button></div>
 <div class="buttons one"><button id="downloadSlotsNC" class="green">2. Download Fret Slots .NC</button></div>
 <div class="buttons one"><button id="downloadOutlineNC" class="green">3. Download Outline .NC</button></div>
@@ -81,16 +87,16 @@ Print in <strong>Portrait</strong> orientation at <strong>100% / Actual Size</st
 <div class="buttons"><button id="downloadSlots" class="secondary">Fret Slots SVG</button><button id="downloadOutline" class="secondary">Outline SVG</button></div>
 <div class="buttons one"><button id="downloadCombined" class="light">Combined SVG</button></div>
 <div id="message"></div>
-<div class="note"><strong>Recommended Easel workflow:</strong> use two separate Easel workpieces. Import the Fret Slots SVG (frets, nut line, and centerline) on the detail workpiece. Import the Outline SVG (closed perimeter only) on the outline workpiece.</div>
+<div class="note"><strong>Optional 2D Easel workflow:</strong> use two separate Easel workpieces. Import the Fret Slots SVG (frets, nut line, and centerline) on the detail workpiece. Import the Outline SVG (closed perimeter only) on the outline workpiece.</div>
 <div class="note"><strong>Export:</strong> enter a filename above. On supported desktop browsers, export opens a Save As dialog where you can choose the folder and filename. On iPhone/Safari, the browser uses the normal iOS download/save workflow.<br><br><strong>Saved fretboards:</strong> named designs are stored in this browser on this device. They persist when you return to the site, but do not automatically sync to another device.</div>
 </section>
 <section class="panel"><div class="summary"><div><small>12th fret</small><strong id="s12">—</strong></div><div><small>14th fret</small><strong id="s14">—</strong></div><div><small>Board length</small><strong id="sLength">—</strong></div><div><small>End width</small><strong id="sEndWidth">—</strong></div></div><div id="previewWrap"><svg id="preview" xmlns="http://www.w3.org/2000/svg"></svg></div></section>
 </main>
 <div id="printArea" aria-hidden="true"></div>
-<footer>Usonian Guitar Co. • Fretboard Generator • Version 4.4.3 • Last Updated 2026-10-04</footer>
+<footer>Usonian Guitar Co. • Fretboard Generator • Version 4.5.0 • Last Updated 2026-10-04</footer>
 <script>
 (()=>{"use strict";
-const VERSION="4.4.3", STORAGE_KEY="usonian-fretboard-projects-v1", $=id=>document.getElementById(id);let files={slots:"",outline:"",combined:""};
+const VERSION="4.5.0", STORAGE_KEY="usonian-fretboard-projects-v1", $=id=>document.getElementById(id);let files={slots:"",outline:"",combined:""};
 const factor=()=>$("units").value==="in"?25.4:1;const num=id=>Number($(id).value);const fretPos=(s,n)=>s*(1-Math.pow(2,-n/12));
 function widthAt(pos,nut,w14,f14){return Math.abs(w14-nut)<1e-9?nut:nut+(w14-nut)*(pos/f14)}
 function shown(mm){const inch=$("units").value==="in",v=inch?mm/25.4:mm;return v.toFixed(inch?4:2)+" "+(inch?"in":"mm")}
@@ -161,6 +167,84 @@ function geometry(p){const f14=fretPos(p.scale,14),last=fretPos(p.scale,p.frets)
 function shell(g,body,title,desc){return `<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" width="${g.vw.toFixed(4)}mm" height="${g.vh.toFixed(4)}mm" viewBox="0 0 ${g.vw.toFixed(4)} ${g.vh.toFixed(4)}"><title>${title}</title><desc>Usonian Fretboard Generator v${VERSION}. ${desc}</desc>${body}</svg>`}
 function buildFiles(p){const g=geometry(p),outlineBody=`<g id="FRETBOARD_OUTLINE" fill="none" stroke="#000" stroke-width="0.01"><path d="${g.outlinePath}"/></g>`,slotsBody=`<g id="FRET_LINES" fill="none" stroke="#000" stroke-width="0.01">${g.fretLines}${g.nutLine}${g.center}</g>`;files.outline=shell(g,outlineBody,"Usonian Fretboard Outline","One continuous closed fretboard perimeter and no other paths.");files.slots=shell(g,slotsBody,"Usonian Fret Slots","Fret lines, nut line when selected, and centerline when selected.");files.combined=shell(g,outlineBody+slotsBody,"Usonian Fretboard Combined","Combined outline and slots.");return g}
 function render(){const m=$("message");try{const p=parameters(),g=buildFiles(p),doc=new DOMParser().parseFromString(files.combined,"image/svg+xml"),node=document.importNode(doc.documentElement,true);node.removeAttribute("width");node.removeAttribute("height");node.setAttribute("preserveAspectRatio","xMidYMid meet");$("preview").replaceWith(node);node.id="preview";$("s12").textContent=shown(fretPos(p.scale,12));$("s14").textContent=shown(g.f14);$("sLength").textContent=shown(g.length);$("sEndWidth").textContent=shown(g.endWidth);m.className="ok";m.textContent="Fretboard generated."}catch(e){m.className="error";m.textContent=e.message}}
+function buildSTL(){
+  const p=parameters(),g=geometry(p),ncp=ncParameters(),thickness=ncp.outlineDepth;
+  const includeSlots=$("stlSlots").checked;
+  if(!(g.length>0))throw Error("Board length must be greater than zero.");
+  if(includeSlots&&p.overrun<0)throw Error("For the STL with fret slots, set fret overrun to 0 or greater. Use the surface-only STL for an inset-slot design.");
+  const sag=x=>radiusSag(x,ncp.radiusMm);
+  if(thickness-sag(g.endWidth/2)-(includeSlots?ncp.depth:0)<=0)throw Error("Increase board thickness: the radius and fret slots would cut through the bottom.");
+  const rows=[[0,0]],slotWidth=ncp.cutter;
+  if(includeSlots){
+    let previous=0;
+    for(let n=1;n<=p.frets;n++){
+      const pos=fretPos(p.scale,n),lo=pos-slotWidth/2,hi=pos+slotWidth/2;
+      if(lo<=previous||hi>=g.length)throw Error("Fret slots overlap or reach a board end. Reduce slot width or increase end extension.");
+      rows.push([lo,0],[lo,ncp.depth],[hi,ncp.depth],[hi,0]);previous=hi;
+    }
+  }
+  rows.push([g.length,0]);
+  const vertices=[],faces=[],indices=new Map(),N=160;
+  function vertex(point){const p=point.map(v=>Math.round(v*1e9)/1e9),key=p.join(',');if(!indices.has(key)){indices.set(key,vertices.length);vertices.push(p)}return indices.get(key)}
+  function tri(a,b,c){
+    if(a===b||b===c||c===a)return;
+    const A=vertices[a],B=vertices[b],C=vertices[c],u=B.map((v,i)=>v-A[i]),v=C.map((v,i)=>v-A[i]);
+    const cross=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]];
+    if(cross.reduce((s,v)=>s+v*v,0)>1e-20)faces.push([a,b,c]);
+  }
+  function quad(a,b,c,d){tri(a,b,c);tri(a,c,d)}
+  const top=[],bottom=[],middle=[],midDepth=includeSlots?ncp.depth:thickness/2;
+  for(const [y,depth] of rows){
+    const half=widthAt(y,p.nut,p.width14,g.f14)/2,t=[],b=[],m=[];
+    for(let i=0;i<=N;i++){
+      const x=half*(2*i/N-1),X=x+g.endWidth/2,Y=g.length-y,z=thickness-sag(x);
+      t.push(vertex([X,Y,z-depth]));b.push(vertex([X,Y,0]));m.push(vertex([X,Y,z-midDepth]));
+    }
+    top.push(t);bottom.push(b);middle.push(m);
+  }
+  for(let j=0;j<rows.length-1;j++){
+    for(let i=0;i<N;i++){
+      quad(top[j][i],top[j][i+1],top[j+1][i+1],top[j+1][i]);
+      quad(bottom[j][i],bottom[j+1][i],bottom[j+1][i+1],bottom[j][i+1]);
+    }
+    for(const i of [0,N]){
+      const m0=middle[j][i],m1=middle[j+1][i];
+      if(i===0){quad(bottom[j][i],m0,m1,bottom[j+1][i]);quad(m0,top[j][i],top[j+1][i],m1)}
+      else{quad(bottom[j][i],bottom[j+1][i],m1,m0);quad(m0,m1,top[j+1][i],top[j][i])}
+    }
+  }
+  for(const j of [0,rows.length-1])for(let i=0;i<N;i++)for(const [lo,hi] of [[bottom[j],middle[j]],[middle[j],top[j]]]){
+    if(j===0)quad(lo[i],lo[i+1],hi[i+1],hi[i]);else quad(lo[i],hi[i],hi[i+1],lo[i+1]);
+  }
+  // Y reflection keeps the nut at the top; reverse winding to retain outward normals.
+  faces.forEach(face=>[face[1],face[2]]=[face[2],face[1]]);
+  const buffer=new ArrayBuffer(84+50*faces.length),view=new DataView(buffer);
+  const header=new TextEncoder().encode("Usonian Fretboard | millimeters | nut at +Y | v"+VERSION);
+  new Uint8Array(buffer,0,80).set(header.slice(0,80));view.setUint32(80,faces.length,true);
+  let offset=84;
+  for(const face of faces){
+    const [a,b,c]=face.map(i=>vertices[i]),u=b.map((v,i)=>v-a[i]),v=c.map((v,i)=>v-a[i]);
+    const n=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]],len=Math.hypot(...n);
+    for(const value of [...n.map(v=>v/len),...a,...b,...c]){view.setFloat32(offset,value,true);offset+=4}
+    view.setUint16(offset,0,true);offset+=2;
+  }
+  return buffer;
+}
+async function saveSTL(){
+  try{
+    const buffer=buildSTL(),filename=exportBase()+" - Fretboard.stl",blob=new Blob([buffer],{type:"model/stl"});
+    if("showSaveFilePicker" in window){
+      try{
+        const handle=await window.showSaveFilePicker({suggestedName:filename,types:[{description:"3D STL model",accept:{"model/stl":[".stl"]}}]});
+        const writable=await handle.createWritable();await writable.write(blob);await writable.close();
+        $("message").className="ok";$("message").textContent='Saved "'+handle.name+'". Import it into Easel as a 3D STL in millimeters.';return;
+      }catch(err){if(err&&err.name==="AbortError")return}
+    }
+    const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+    $("message").className="ok";$("message").textContent='Exported "'+filename+'". Import it into Easel as a 3D STL in millimeters.';
+  }catch(e){$("message").className="error";$("message").textContent=e.message}
+}
+
 function cleanFileBase(name){
   return (name||"Usonian_Fretboard")
     .trim()
@@ -232,8 +316,8 @@ function state(){return{units:$("units").value,scale:$("scale").value,nutWidth:$
     pageOverlap:$("pageOverlap").value,
     printFretNumbers:$("printFretNumbers").checked,
     printCenterline:$("printCenterline").checked,savedAt:new Date().toISOString(),exportName:$("exportName").value,
-    ncDepth:$("ncDepth").value,outlineBit:$("outlineBit").value,radiusBit:$("radiusBit").value,ncCutter:$("ncCutter").value,ncRadius:$("ncRadius").value,outlineDepth:$("outlineDepth").value,version:VERSION}}
-function apply(s){["units","scale","nutWidth","width14","frets","extension","overrun","nutThickness","exportName","ncDepth","outlineBit","radiusBit","ncCutter","ncRadius","outlineDepth"].forEach(id=>{if(s[id]!==undefined)$(id).value=s[id]});if(s.nutline!==undefined)$("nutline").checked=s.nutline;if(s.centerline!==undefined)$("centerline").checked=s.centerline;render()}
+    stlSlots:$("stlSlots").checked,ncDepth:$("ncDepth").value,outlineBit:$("outlineBit").value,radiusBit:$("radiusBit").value,ncCutter:$("ncCutter").value,ncRadius:$("ncRadius").value,outlineDepth:$("outlineDepth").value,version:VERSION}}
+function apply(s){$("stlSlots").checked=s.stlSlots!==false;["units","scale","nutWidth","width14","frets","extension","overrun","nutThickness","exportName","ncDepth","outlineBit","radiusBit","ncCutter","ncRadius","outlineDepth"].forEach(id=>{if(s[id]!==undefined)$(id).value=s[id]});if(s.nutline!==undefined)$("nutline").checked=s.nutline;if(s.centerline!==undefined)$("centerline").checked=s.centerline;render()}
 function refresh(selected=""){const p=getProjects(),s=$("savedProjects");s.innerHTML='<option value="">— Saved fretboards —</option>';Object.keys(p).sort().forEach(n=>{const o=document.createElement("option");o.value=n;o.textContent=n;s.appendChild(o)});if(selected&&p[selected])s.value=selected}
 function saveProject(){const n=$("projectName").value.trim(),m=$("saveMessage");if(!n){m.className="error";m.textContent="Enter a name for this fretboard.";return}const p=getProjects();p[n]=state();setProjects(p);refresh(n);m.className="ok";m.textContent=`Saved "${n}".`}
 function loadProject(){const n=$("savedProjects").value,m=$("saveMessage"),p=getProjects();if(!n||!p[n]){m.className="error";m.textContent="Choose a saved fretboard first.";return}$("projectName").value=n;apply(p[n]);m.className="ok";m.textContent=`Loaded "${n}".`}
@@ -350,7 +434,7 @@ function printTemplate(){
   window.print();
 }
 
-$("generate").onclick=render;
+$("generate").onclick=render;$("downloadSTL").onclick=saveSTL;
 $("printTemplate").onclick=printTemplate;$("downloadRadiusNC").onclick=()=>saveNC(buildRadiusNC,"1 Radius");$("downloadSlotsNC").onclick=()=>saveNC(buildSlotsNC,"2 Fret Slots");$("downloadOutlineNC").onclick=()=>saveNC(buildOutlineNC,"3 Outline");$("downloadSlots").onclick=()=>saveFile(files.slots,"Fret Slots");$("downloadOutline").onclick=()=>saveFile(files.outline,"Outline");$("downloadCombined").onclick=()=>saveFile(files.combined,"Combined");$("saveProject").onclick=saveProject;$("loadProject").onclick=loadProject;$("renameProject").onclick=renameProject;$("duplicateProject").onclick=duplicateProject;$("deleteProject").onclick=deleteProject;
 $("units").addEventListener("change",()=>{const toIn=$("units").value==="in";["scale","nutWidth","width14","extension","overrun","nutThickness"].forEach(id=>{const e=$(id),v=Number(e.value);if(Number.isFinite(v))e.value=(toIn?v/25.4:v*25.4).toFixed(toIn?4:2)});render()});["scale","nutWidth","width14","frets","extension","overrun","nutThickness"].forEach(id=>$(id).addEventListener("input",render));["ncDepth","outlineBit","radiusBit","ncCutter","ncRadius","outlineDepth"].forEach(id=>$(id).addEventListener("input",()=>{$("message").className="ok";$("message").textContent="UGS .NC settings updated.";}));["nutline","centerline"].forEach(id=>$(id).addEventListener("change",render));refresh();render();
 })();
