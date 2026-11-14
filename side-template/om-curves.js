@@ -40,8 +40,8 @@
     backRadius:4572,
     neckDepth:79.3,
     tailDepth:104.5,
-    neckExtension:25,
-    tailExtension:25,
+    neckExtension:0,
+    tailExtension:0,
     neckBlockWidth:18.9987,
     tailBlockWidth:0,
     upperBoutWidth:288.7096,
@@ -65,6 +65,9 @@
     el.dispatchEvent(new Event('input',{bubbles:true}));
   }
   function applyOmDefaults(){
+    // Once installed, the preset selector owns defaults. A queued startup
+    // frame must not overwrite a selected preset or the user's edits.
+    if(window.usonianSidePresets) return;
     Object.entries(omDefaults).forEach(([id,value])=>{
       const el=document.getElementById(id);
       if(el) el.value=String(value);

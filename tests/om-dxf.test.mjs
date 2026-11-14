@@ -218,3 +218,22 @@ test('the three named presets restore tested dimensions, one radius, and zero ex
  assert.equal(e.get('profileSource').value,'calculated');
  assert.notEqual(e.get('preset').disabled,true,'preset selection remains available in trace mode');
 });
+
+test('legacy queued startup defaults cannot overwrite the selected preset or edits',async()=>{
+ const elements=new Map(),frames=[];
+ const element=()=>({value:'',parentElement:{},addEventListener(){},appendChild(){}});
+ for(const id of ['preset','resetBtn','topThickness','backThickness','trimAllowance',...Object.keys(setup(true).c.usonianSidePresets.dread14.values)])elements.set(id,element());
+ const c={document:{getElementById:id=>elements.get(id),querySelector:()=>null,createElement:element},render(){},addEventListener(){},requestAnimationFrame:f=>frames.push(f)};
+ c.window=c;vm.createContext(c);
+ vm.runInContext(await read('side-template/om-curves.js'),c);
+ vm.runInContext(presetsSource,c);
+ vm.runInContext(await read('side-template/defaults.js'),c);
+ assert.equal(elements.get('neckExtension').value,'0');
+ assert.equal(elements.get('backRadius').value,'4572');
+ c.applyUsonianSidePreset('dread14');elements.get('backRadius').value='3048';
+ while(frames.length)frames.shift()();
+ assert.equal(elements.get('preset').value,'dread14');
+ assert.equal(elements.get('bodyLength').value,'513.3');
+ assert.equal(elements.get('backRadius').value,'3048');
+ assert.equal(elements.get('neckExtension').value,'0');
+});
