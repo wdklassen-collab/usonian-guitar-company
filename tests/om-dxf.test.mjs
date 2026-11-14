@@ -30,10 +30,12 @@ test('DXF outside curve is preserved at 485.8 mm, with no neck-notch detour',()=
  assert.ok(ref.samples.length>2900);
  for(let i=1;i<ref.samples.length;i++)assert.ok(ref.samples[i][0]>ref.samples[i-1][0],'single-valued, ordered half-outline');
  for(const [x,y] of ref.samples)assert.ok(Math.abs(g.widthFn(x)/2-y)<0.002,'measured contour retained within 0.002 mm');
- // Full outer half between the neck opening and tail center, excluding all
+ // Full outer half between neck centerline and tail center, excluding all
  // CNC notch edges; dense arc sampling avoids losing near-vertical lengths.
- assert.ok(g.sideLength>738 && g.sideLength<740);
- assert.equal(g.samples.length,ref.samples.length);
+ assert.ok(g.sideLength>748 && g.sideLength<749);
+ assert.equal(g.samples[0].w,0);
+ assert.ok(Math.abs(g.samples[1].s-p.neckBlockWidth/2)<1e-8);
+ assert.equal(g.samples.length,ref.samples.length+1);
  assert.equal(g.samples.at(-1).s,g.sideLength);
  assert.equal(g.samples.at(-1).w,0);
  const top=c.topViewSVG(p,g,true),side=c.sideViewSVG(p,g,true),combined=c.combinedSVG(p,g,true);
@@ -185,4 +187,14 @@ test('literal 00 trace exports the original polyline at physical PDF scale, with
  assert.equal(cut.sideLength,g.sideLength);
  for(let i=0;i<g.samples.length;i++)assert.ok(Math.abs(g.samples[i].d-cut.samples[i].d-4.5)<1e-9);
  e.get('profileSource').value='calculated';assert.ok(!c.sampleGeometry(p).traced);
+});
+
+test('OM developed length includes exactly the half neck face, with no joinery detour',()=>{
+ const {c}=setup(),p=c.readInputs(),g=c.sampleGeometry(p);
+ let outerLength=0;
+ const ref=c.usonianOMReference.samples;
+ for(let i=1;i<ref.length;i++)outerLength+=Math.hypot(ref[i][0]-ref[i-1][0],ref[i][1]-ref[i-1][1]);
+ assert.ok(Math.abs(g.sideLength-outerLength-p.neckBlockWidth/2)<0.002);
+ assert.ok(Math.abs(g.sideLength-748.3894)<0.002);
+ assert.ok(Math.abs(g.sideLength-749.0208)<0.7,'matches supplied PDF length within the outline difference');
 });

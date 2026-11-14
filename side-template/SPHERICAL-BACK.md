@@ -23,3 +23,7 @@ The literal side drawing has its own developed length, independent of the perime
 ## Deployment and checks
 
 The route bundles sources from its checkout; branch previews never fetch mutable main-branch scripts. Run `node --test tests/om-dxf.test.mjs tests/side-print.test.mjs` from the repository root. Checks cover OM and Dreadnought regressions, spherical geometry, large-radius behavior, invalid dimensions, thickness and trim deductions, input summaries, measured 00 dimensions, literal trace coordinates, exports, and portrait tiling.
+
+## BinderOM.pdf validation
+
+The supplied sheet 05 side measures 749.020755 mm; its printed dimension is 749 mm. The measured DXF used by the OM preset starts at a neck opening corner, 9.49935 mm from the centerline. Include that half neck face in unrolling, consistently with the Dreadnought preset. No CNC notch edges are added. Corrected OM developed length is 748.389 mm, approximately 0.632 mm shorter than the PDF, consistent with the approximately 0.7 mm maximum outline difference. One 3657.6 mm back radius and end depths 79.3/104.5 mm give up to approximately 2.5 mm depth difference from the PDF's drafted side profile. This remains calculated geometry, not a literal OM side trace.
