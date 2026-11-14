@@ -1,0 +1,46 @@
+name: Rust backend preview checks
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [feature/rust-backend]
+permissions:
+  contents: read
+jobs:
+  geometry-and-website:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CLOUDFLARE_CF_FETCH_ENABLED: 'false'
+      WRANGLER_SEND_METRICS: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked Node dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Install pinned Rust toolchain and Wasm target
+        run: |
+          rustup toolchain install 1.91.1 --profile minimal --component rustfmt --component clippy
+          rustup target add wasm32-unknown-unknown --toolchain 1.91.1
+          cargo install wasm-bindgen-cli --version 0.2.105 --locked
+      - name: Formatting and Rust lint
+        working-directory: backend
+        run: |
+          cargo fmt --all -- --check
+          cargo clippy --locked --workspace --all-targets -- -D warnings
+      - name: Lint new source
+        run: npx eslint 'app/api/v1/[...path]/route.ts' app/rust-fretboard/page.tsx backend/cloudflare/*.js backend/scripts/*.mjs backend/tests/*.mjs backend/tests/*.cjs side-template/rust-client.js
+      - name: Native, Wasm, parity, HTTP and client-state tests
+        run: npm run backend:test
+      - name: Verify isolated Worker packaging (no deployment)
+        run: npm run backend:dry-run
+      - name: Website production build
+        run: npm run build
+      - name: Existing website regression tests
+        # Legacy fretboard NC/STL tests already fail on main; see backend/VALIDATION.md.
+        run: node --test tests/cnc-template.test.mjs tests/cnc-import-ui.test.mjs tests/om-dxf.test.mjs tests/side-print.test.mjs tests/tool-routes.test.mjs tests/rendered-html.test.mjs
+      - name: Actual local website to Rust integration
+        run: npm run backend:smoke

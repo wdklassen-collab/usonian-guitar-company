@@ -20,3 +20,12 @@ npm run dev
 ```bash
 npm run build
 ```
+
+## Rust tool platform (feature preview)
+
+The shared Rust geometry core and isolated Cloudflare Wasm adapter live in
+[`backend`](backend/README.md). Side/top integration is opt-in at
+`/side-template/?engine=rust`; a minimal second generator is at `/rust-fretboard/`.
+Set `RUST_API_URL` only on a preview deployment after verifying the isolated backend.
+Normal browser mode does not require Rust or an API service. See the backend README
+for architecture, validation, exact API contracts and local tests.
