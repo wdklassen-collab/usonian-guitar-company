@@ -27,3 +27,9 @@ The route bundles sources from its checkout; branch previews never fetch mutable
 ## BinderOM.pdf validation
 
 The supplied sheet 05 side measures 749.020755 mm; its printed dimension is 749 mm. The measured DXF used by the OM preset starts at a neck opening corner, 9.49935 mm from the centerline. Include that half neck face in unrolling, consistently with the Dreadnought preset. No CNC notch edges are added. Corrected OM developed length is 748.389 mm, approximately 0.632 mm shorter than the PDF, consistent with the approximately 0.7 mm maximum outline difference. One 3657.6 mm back radius and end depths 79.3/104.5 mm give up to approximately 2.5 mm depth difference from the PDF's drafted side profile. This remains calculated geometry, not a literal OM side trace.
+
+## Named presets
+
+The selector lists OM-14, Dreadnought-14, and 00-14, in that order. All use a single 3657.6 mm (12 ft) back radius, zero end extensions, and zero plate/trim adjustments by default, matching validation settings. OM-14: 485.8 mm body, 79.3/104.5 mm finished end depths. Dreadnought-14: 513.3 mm body, 95.3/120.7 mm end depths. 00-14: 500 mm body and the extracted 87.367336/102.400355 mm end depths. Measured outline sources and registration stations are retained.
+
+Startup and Reset share the canonical preset values. Preset selection remains available in literal-trace mode; selecting OM-14 or Dreadnought-14 returns to calculated mode automatically. The explicit 00 literal trace remains available separately.

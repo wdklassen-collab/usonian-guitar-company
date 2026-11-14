@@ -25,7 +25,7 @@ function setup(measured=false){
 }
 test('DXF outside curve is preserved at 485.8 mm, with no neck-notch detour',()=>{
  const {c}=setup(),p=c.readInputs(),ref=c.usonianOMReference,g=c.sampleGeometry(p);
- assert.equal(p.neckExtension,25);assert.equal(p.tailExtension,25);
+ assert.equal(p.neckExtension,0);assert.equal(p.tailExtension,0);
  assert.equal(p.bodyLength,485.8);assert.equal(ref.samples[0][0],0);assert.equal(ref.samples.at(-1)[0],485.8);
  assert.ok(ref.samples.length>2900);
  for(let i=1;i<ref.samples.length;i++)assert.ok(ref.samples[i][0]>ref.samples[i-1][0],'single-valued, ordered half-outline');
@@ -82,7 +82,7 @@ test('Dreadnought plan contour matches 771 mm template and preserves OM on switc
  assert.equal(g.samples[1].x,0);assert.ok(Math.abs(g.samples[1].s-p.neckBlockWidth/2)<1e-8);
  for(const [x,y] of ref.samples)assert.ok(Math.abs(g.widthFn(x)-2*y)<0.0001);
  assert.equal(e.get('lowerBoutFrontRadius').parentElement.hidden,true);
- assert.ok(Math.abs(g.sideLength+p.neckExtension+p.tailExtension-821.09256)<0.002);
+ assert.ok(Math.abs(g.sideLength+p.neckExtension+p.tailExtension-771.09256)<0.002);
  for(const svg of [c.topViewSVG(p,g,true),c.sideViewSVG(p,g,true),c.combinedSVG(p,g,true)])assert.ok(!/NaN|Infinity/.test(svg));
  e.get('backRadius').value='3048';const changed=c.sampleGeometry(c.readInputs());
  assert.equal(changed.sideLength,g.sideLength);assert.ok(changed.samples.some((s,i)=>Math.abs(s.d-g.samples[i].d)>0.1));
@@ -110,7 +110,7 @@ test('rim samples lie on one sphere, and equal end depths are deepest near the w
   const s=tapered.depthFn.sphere;
   assert.ok(Math.abs(Math.hypot(sample.x-s.cx,sample.w/2,sample.d-s.cz)-p.backRadius)<1e-7);
  }
- console.log('00 comparison:',tapered.sideLength.toFixed(3),'mm; upper/waist/lower depths:',
+ console.log('00-14 comparison:',tapered.sideLength.toFixed(3),'mm; upper/waist/lower depths:',
    [p.upperBoutPos,p.waistPos,p.lowerBoutPos].map(x=>tapered.depthFn(x).toFixed(3)).join(' / '));
 });
 
@@ -124,21 +124,21 @@ test('large radius approaches a straight body-axis taper; invalid geometry is re
 });
 
 test('plate deductions and trim allowance apply once to profile, endpoints, and exported extensions',()=>{
- const {c}=setup();c.applyUsonianSidePreset('plan00');const p=c.readInputs(),g=c.sampleGeometry(p);
+ const {c}=setup(true);c.applyUsonianSidePreset('plan00');const p=c.readInputs(),g=c.sampleGeometry(p);
  const cutP={...p,topThickness:3,backThickness:2.5,trimAllowance:1,neckExtension:12,tailExtension:15};
  const cut=c.sampleGeometry(cutP);
  assert.equal(cut.sideLength,g.sideLength);
  for(let i=0;i<cut.samples.length;i++)assert.ok(Math.abs(cut.samples[i].d-g.samples[i].d+4.5)<1e-8);
  const svg=c.sideViewSVG(cutP,cut,true);
- assert.match(svg,/Neck side 82.9 mm/);assert.match(svg,/Tail side 97.8 mm/);
- assert.ok(svg.includes('L-12.000 82.900'));
- assert.ok(svg.includes('L'+(cut.sideLength+15).toFixed(3)+' 97.800'));
+ assert.match(svg,/Neck side 82.9 mm/);assert.match(svg,/Tail side 97.9 mm/);
+ assert.ok(svg.includes('L-12.000 '+(p.neckDepth-4.5).toFixed(3))); 
+ assert.ok(svg.includes('L'+(cut.sideLength+15).toFixed(3)+' '+(p.tailDepth-4.5).toFixed(3))); 
  assert.match(svg,/data-station="Waist"/);assert.match(svg,/data-inch="1"/);
  assert.ok(!/NaN|Infinity/.test(svg));
 });
 
 test('the original input render handler reports cutting depths and developed length immediately',()=>{
- const {c,e}=setup();c.applyUsonianSidePreset('plan00');
+ const {c,e}=setup(true);c.applyUsonianSidePreset('plan00');
  for(const id of ['statBody','statWidth','statRadius','statDepth','canvas'])e.set(id,{});
  c.currentView='side';
  vm.runInContext(base.slice(base.indexOf('function render(){'),base.indexOf('function download(')),c);
@@ -146,7 +146,7 @@ test('the original input render handler reports cutting depths and developed len
  c.render=()=>{throw new Error('input handlers must work without a render wrapper');};
  e.get('topThickness').value='3';e.get('backThickness').value='2.5';e.get('trimAllowance').value='1';
  inputHandler();
- assert.match(e.get('statDepth').textContent,/Side depth: 82.9 → 97.8 mm · Side length: 739.7 mm/);
+ assert.match(e.get('statDepth').textContent,/Side depth: 82.9 → 97.9 mm · Side length: 729.5 mm/);
  assert.match(e.get('canvas').innerHTML,/Neck side 82.9 mm/);
  e.get('backRadius').value='0';inputHandler();
  assert.equal(e.get('statDepth').textContent,'Check dimensions');
@@ -197,4 +197,24 @@ test('OM developed length includes exactly the half neck face, with no joinery d
  assert.ok(Math.abs(g.sideLength-outerLength-p.neckBlockWidth/2)<0.002);
  assert.ok(Math.abs(g.sideLength-748.3894)<0.002);
  assert.ok(Math.abs(g.sideLength-749.0208)<0.7,'matches supplied PDF length within the outline difference');
+});
+
+test('the three named presets restore tested dimensions, one radius, and zero extensions',()=>{
+ const {c,e}=setup(true);
+ const expected={om14:['OM-14',485.8,79.3,104.5],dread14:['Dreadnought-14',513.3,95.3,120.7],plan00:['00-14',500,87.36733623080782,102.40035489400226]};
+ for(const [key,[label,length,neck,tail]] of Object.entries(expected)){
+  c.applyUsonianSidePreset(key);let p=c.readInputs();
+  assert.equal(c.usonianSidePresets[key].label,label);
+  assert.equal(p.bodyLength,length);assert.equal(p.neckDepth,neck);assert.equal(p.tailDepth,tail);
+  assert.equal(p.backRadius,3657.6);assert.equal(p.neckExtension,0);assert.equal(p.tailExtension,0);
+  e.get('bodyLength').value=600;e.get('backRadius').value=4500;e.get('topThickness').value=3;
+  e.get('resetBtn').listeners.click({preventDefault(){},stopImmediatePropagation(){}});
+  p=c.readInputs();assert.equal(p.bodyLength,length);assert.equal(p.backRadius,3657.6);assert.equal(p.topThickness,0);
+ }
+ e.get('profileSource').value='trace00';e.get('profileSource').listeners.change();
+ assert.equal(e.get('bodyLength').disabled,true);
+ assert.notEqual(e.get('preset').disabled,true);
+ c.applyUsonianSidePreset('om14');
+ assert.equal(e.get('profileSource').value,'calculated');
+ assert.notEqual(e.get('preset').disabled,true,'preset selection remains available in trace mode');
 });

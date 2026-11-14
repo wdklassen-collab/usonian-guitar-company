@@ -26,7 +26,7 @@
     upperBoutWidth:upper[1]*2,upperBoutPos:upper[0],waistWidth:waist[1]*2,waistPos:waist[0],
     lowerBoutWidth:lower[1]*2,lowerBoutPos:lower[0]
   });
-  preset.label='00 plan (measured)';
+  preset.label='00-14';
   const option=document.querySelector('#preset option[value="plan00"]');
   if(option) option.textContent=preset.label;
   const note=document.getElementById('referenceNote');
@@ -52,7 +52,7 @@
   const source=document.getElementById('profileSource');
   function updateLock(){
     const traced=source?.value==='trace00';
-    for(const id of ['preset','bodyLength','backRadius','neckDepth','tailDepth','neckBlockWidth','tailBlockWidth','upperBoutWidth','upperBoutPos','waistWidth','waistPos','lowerBoutWidth','lowerBoutPos']){
+    for(const id of ['bodyLength','backRadius','neckDepth','tailDepth','neckBlockWidth','tailBlockWidth','upperBoutWidth','upperBoutPos','waistWidth','waistPos','lowerBoutWidth','lowerBoutPos']){
       const el=document.getElementById(id);if(el) el.disabled=traced;
     }
   }
