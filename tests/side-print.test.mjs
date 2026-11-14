@@ -101,7 +101,7 @@ test('route bundles checkout sources in order and needs no runtime GitHub fetch'
     assert.equal(response.status,200);
     const html=await response.text();
     assert.ok(html.indexOf(developedSource)<html.indexOf(printSource));
-    assert.ok(html.includes('spherical back dish'));
+    assert.ok(html.includes('developed side contours'));
     assert.ok(!html.includes('raw.githubusercontent.com'));
     context.developed='';
     assert.equal((await context.GET()).status,502);

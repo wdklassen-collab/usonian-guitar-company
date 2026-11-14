@@ -7,16 +7,19 @@ const source=await read('side-template/om-dxf.js');
 const developed=await read('side-template/developed-side.js');
 const base=await read('side-template/index.html');
 const presetsSource=await read('side-template/presets.js');
-function setup(){
+const planSource=await read('side-template/plan00-reference.js');
+function setup(measured=false){
  const elements=new Map();
- for(const id of ['preset','resetBtn','topThickness','backThickness','trimAllowance','lowerBoutFrontRadius','lowerBoutRadius','upperBoutNeckRadius','upperBoutWaistRadius','omContourNote'])elements.set(id,{value:'om14',parentElement:{},listeners:{},addEventListener(t,f){this.listeners[t]=f;},appendChild(){}});
- const c={document:{getElementById:id=>elements.get(id),createElement:()=>({})},render(){},makeWidthFunction:()=>()=>123};c.window=c;vm.createContext(c);
+ for(const id of ['preset','resetBtn','topThickness','backThickness','trimAllowance','longitudinalRadius','profileSource','lowerBoutFrontRadius','lowerBoutRadius','upperBoutNeckRadius','upperBoutWaistRadius','omContourNote'])elements.set(id,{value:'om14',parentElement:{},listeners:{},addEventListener(t,f){this.listeners[t]=f;},appendChild(){}});
+ const c={document:{getElementById:id=>elements.get(id),querySelector:()=>null,createElement:()=>({})},render(){},makeWidthFunction:()=>()=>123};c.window=c;vm.createContext(c);
  vm.runInContext(presetsSource,c);
  for(const p of Object.values(c.usonianSidePresets))for(const id of Object.keys(p.values))if(!elements.has(id))elements.set(id,{value:0});
  c.readInputs=()=>Object.fromEntries([...elements].map(([id,e])=>[id,Number(e.value)]));
  vm.runInContext(source,c);
  vm.runInContext(base.slice(base.indexOf('function sagittaFromHalfWidth'),base.indexOf('function sampleGeometry')),c);
  vm.runInContext(base.slice(base.indexOf('function pathFrom('),base.indexOf('function sideViewSVG(')),c);
+ if(measured) vm.runInContext(planSource,c);
+ elements.get('profileSource').value='calculated';
  vm.runInContext(developed,c);
  c.applyUsonianSidePreset('om14');return {c,e:elements};
 }
@@ -146,4 +149,34 @@ test('the original input render handler reports cutting depths and developed len
  e.get('backRadius').value='0';inputHandler();
  assert.equal(e.get('statDepth').textContent,'Check dimensions');
  assert.match(e.get('canvas').textContent,/positive body dimensions/);
+});
+
+test('00 measured outline and two-radius surface replace screenshot estimates',()=>{
+ const {c}=setup(true);c.applyUsonianSidePreset('plan00');const p=c.readInputs(),g=c.sampleGeometry(p);
+ assert.equal(p.backRadius,3657.6);assert.equal(p.longitudinalRadius,4605.3);
+ assert.ok(Math.abs(p.upperBoutWidth-251.1564)<0.001);
+ assert.ok(Math.abs(p.waistWidth-211.8235)<0.001);
+ assert.ok(Math.abs(p.lowerBoutWidth-357.4458)<0.001);
+ assert.ok(g.sideLength>729 && g.sideLength<730);
+ assert.ok(g.samples.every(s=>Number.isFinite(s.d)));
+ console.log('Measured 00 perimeter:',g.sideLength.toFixed(4));
+});
+
+test('literal 00 trace exports the original polyline at physical PDF scale, with plate deductions only',()=>{
+ const {c,e}=setup(true);c.applyUsonianSidePreset('plan00');e.get('profileSource').value='trace00';
+ const p=c.readInputs(),g=c.sampleGeometry(p);
+ assert.ok(Math.abs(g.sideLength-729.967545)<0.000001);
+ assert.ok(Math.abs(g.samples[0].d-87.367336)<0.000001);
+ assert.ok(Math.abs(g.samples.at(-1).d-102.400355)<0.000001);
+ // Independently measured source station at the conspicuous waist kink.
+ const kink=g.samples.find(s=>Math.abs(s.s-348.966942)<0.000001);
+ assert.ok(kink);assert.ok(Math.abs(kink.d-100.200360)<0.000001);
+ assert.equal(g.samples.length,28);
+ assert.ok(g.topSamples.length>100,'the top outline retains the full PDF polyline');
+ const svg=c.sideViewSVG(p,g,true);assert.ok(svg.includes('348.967 100.200'));assert.ok(svg.includes('literal plan trace'));
+ for(const picture of [svg,c.topViewSVG(p,g,true),c.combinedSVG(p,g,true)])assert.ok(!/NaN|Infinity/.test(picture));
+ const cut=c.sampleGeometry({...p,topThickness:3,backThickness:2.5,trimAllowance:1});
+ assert.equal(cut.sideLength,g.sideLength);
+ for(let i=0;i<g.samples.length;i++)assert.ok(Math.abs(g.samples[i].d-cut.samples[i].d-4.5)<1e-9);
+ e.get('profileSource').value='calculated';assert.ok(!c.sampleGeometry(p).traced);
 });

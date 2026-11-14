@@ -1,19 +1,25 @@
-# Spherical back comparison branch
+# Back geometry and supplied 00 plan
 
-The back rim is the lower intersection with one sphere whose center is on the body symmetry plane. Two circles in the longitudinal/depth plane locate the center from the radius, end half-widths, body length, and finished end depths. Every sampled rim point is evaluated on that same sphere. Side X remains accumulated top-view perimeter distance, appropriate to the flat top datum and vertical sides.
+## Calculation
 
-Finished depths are measured at the outline ends. Side cutting depth equals finished depth minus top thickness minus back thickness plus trimming allowance. Defaults keep all three adjustments at zero to preserve the existing depth convention. This model assumes a flat top edge, vertical sides, and constant vertical plate deductions; it does not model a radiused top, plate-normal offsets, or flared sides.
+With longitudinal radius set to zero, the back rim is the lower intersection with one sphere fitted to the outline end depths. A separate positive longitudinal radius selects two circular cross sections: a longitudinal arc fitted to end depths with a transverse circular sag deduction. This allows plans that specify different radii in the two directions. These are distinct models; neither is automatically a literal reproduction of a drafted side contour.
 
-SVG, combined SVG, and tiled print share the same side geometry. Blue lines locate bouts and waist along the developed perimeter. Inch stations count from the body tail, excluding extensions. The dashed back line is a straight taper comparison, not a cutting line.
+Side X is accumulated top-view perimeter distance. The top edge is flat; sides are vertical. Cutting depth subtracts top and back thicknesses and adds trimming allowance. These are constant vertical deductions, not plate-normal offsets. All three default to zero. Bout and waist marks use developed distance. Inch stations start at the body tail, excluding extensions. The dashed line is a straight taper comparison.
 
-## 00 plan comparison
+## Binder00-14.pdf reference
 
-The comparison preset uses provisional readings from the supplied raster image: body length 500 mm; full widths 279.6 / 229.8 / 355.6 mm; stations 81 / 186 / 356 mm from the neck; finished end depths 87.4 / 102.3 mm; zero extensions. Its 15 ft radius is an assumption. It reshapes the measured OM contour and is not a traced 00 outline. Calculated side length is 739.688 mm, compared with the reference's 730 mm. Do not globally rescale the side to force that length: that would change registration positions. Exact matching needs a calibrated outline and the actual back radius/top geometry.
+Numeric polylines were extracted directly from sheet 05 at 25.4/72 mm per PDF point. No PDF page, artwork, notes, or photographs are bundled. The body outline is calibrated to its printed 500 mm length. A 0.155 mm neck-front overhang is omitted for a single-valued width function. Its resulting half-perimeter is 729.491 mm. Body widths from this template are 251.156 / 211.824 / 357.446 mm; these differ slightly from dimension text on other sheets.
 
-## Deployment isolation
+The transverse back arch is labeled R3657.6 mm (12 ft) on sheets 02 and 05. The longitudinal back arc is labeled R4605.3 mm on sheet 02. The measured 00 preset uses both radii, replacing the earlier assumed 15 ft sphere and screenshot estimates.
 
-The route bundles sources from the checkout with Vite raw imports. It does not fetch mutable main-branch scripts at request time, so each branch preview tests its own code. Use the Cloudflare Workers build check's preview URL for this branch. Production is updated only through the production workflow after merge.
+The drawn side polyline is 729.967545 mm long, with end depths 87.367336 and 102.400355 mm. The printed labels say 730, 87.4, and 102.3 mm. Preserve these small drafting discrepancies rather than silently distorting the source curve. The reference has a conspicuous local kink at s348.966942, depth100.200360 mm. A calculated smooth surface need not reproduce that kink.
 
-## Checks
+## Literal plan trace
 
-Run `node --test tests/om-dxf.test.mjs tests/side-print.test.mjs` from the repository root. Tests cover measured OM and Dreadnought perimeter regressions, common-sphere geometry, end depths, large-radius behavior, invalid dimensions, thickness and trim deductions, SVG extensions and marks, portrait tiling, and offline route composition. The Cloudflare build verifies raw imports and Worker compilation.
+Selecting `00 plan trace (literal template)` reproduces that exact side polyline in physical millimeters. Body geometry, end depths, and radius controls are locked to the source; plate deductions, trimming allowance, and end extensions remain adjustable. Switching back to calculated mode unlocks geometry. Reset retains the selected mode.
+
+The literal side drawing has its own developed length, independent of the perimeter measured in the separate top drawing. The top view retains the full measured body polyline. The trace mode's side length is not claimed to be a newly calculated perimeter or a validated sphere intersection. This distinction matters for the approximately 0.48 mm difference between the two drawings.
+
+## Deployment and checks
+
+The route bundles sources from its checkout; branch previews never fetch mutable main-branch scripts. Run `node --test tests/om-dxf.test.mjs tests/side-print.test.mjs` from the repository root. Checks cover OM and Dreadnought regressions, spherical geometry, large-radius behavior, invalid dimensions, thickness and trim deductions, input summaries, measured 00 dimensions, literal trace coordinates, exports, and portrait tiling.

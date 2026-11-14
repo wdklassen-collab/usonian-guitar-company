@@ -140,7 +140,7 @@
 <body>
 <header>
   <h1>Usonian Side Template Generator</h1>
-  <p>Geometry-driven body outline · spherical back dish · developed side contour</p>
+  <p>Measured and calculated body outlines · developed side contours</p>
 </header>
 
 <main>
@@ -159,9 +159,11 @@
 
   <div class="group">
     <h2>Body / Radius</h2>
+    <label>Profile Source<select id="profileSource"><option value="calculated">Calculated back surface</option><option value="trace00">00 plan trace (literal template)</option></select></label>
     <div class="grid">
       <label>Body Length (mm)<input id="bodyLength" type="number" step="0.1"></label>
       <label>Back Radius (mm)<input id="backRadius" type="number" step="1"></label>
+      <label>Longitudinal Radius (mm; 0 = same)<input id="longitudinalRadius" type="number" min="0" step="0.1"></label>
       <label>Neck Depth (mm)<input id="neckDepth" type="number" step="0.1"></label>
       <label>Tail Depth (mm)<input id="tailDepth" type="number" step="0.1"></label>
       <label>Neck Extension (mm)<input id="neckExtension" type="number" step="0.1"></label>
@@ -170,7 +172,7 @@
       <label>Back Thickness (mm)<input id="backThickness" type="number" min="0" step="0.1"></label>
       <label>Trimming Allowance (mm)<input id="trimAllowance" type="number" min="0" step="0.1"></label>
     </div>
-    <p class="note">Neck and tail depths are finished outside body depths at the outline ends. Side cutting depth subtracts both plate thicknesses and adds the trimming allowance. Top edge is flat. Positions are measured from the neck; side stations count from the tail.</p>
+    <p class="note">Neck and tail depths are finished outside body depths at the outline ends. Side cutting depth subtracts both plate thicknesses and adds the trimming allowance. Top edge is flat. Set longitudinal radius to 0 for a spherical dish, or enter a separate longitudinal radius from a plan. Positions are measured from the neck; side stations count from the tail.</p>
     <p class="note" id="referenceNote" hidden>00 plan comparison uses approximate readings from the supplied image, reshaped from the OM outline. The 15 ft back radius is assumed. This is not a traced 00 outline; its side length is calculated, not forced to 730 mm.</p>
   </div>
 
@@ -240,7 +242,8 @@ const defaults = {
   tailBlockWidth: 123,
   topThickness: 0,
   backThickness: 0,
-  trimAllowance: 0
+  trimAllowance: 0,
+  longitudinalRadius: 0
 };
 
 const inputIds = Object.keys(defaults);
@@ -382,6 +385,26 @@ function makeSideDepthFunction(p, widthFn){
   const cz=p.neckDepth+a*delta/chord-h*L/chord;
   if(cz>=Math.min(p.neckDepth,p.tailDepth)) throw new Error('Depth taper is too steep for this back radius.');
   const offset=top+back-trim;
+  const longR=p.longitudinalRadius??0;
+  if(!Number.isFinite(longR)||longR<0) throw new Error('Longitudinal radius must be zero or positive.');
+  if(longR>0){
+    const sag=y=>{
+      if(Math.abs(y)>=R) throw new Error('Body width exceeds the transverse back radius.');
+      return R-Math.sqrt(R*R-y*y);
+    };
+    const zN=p.neckDepth+sag(yN),zT=p.tailDepth+sag(yT);
+    const dz=zT-zN,D=Math.hypot(L,dz),h2=longR*longR-D*D/4;
+    if(h2<=0) throw new Error('Longitudinal radius is too small for this body.');
+    const h=Math.sqrt(h2),xc=L/2+h*dz/D,zc=(zN+zT)/2-h*L/D;
+    if(zc>=Math.min(zN,zT)) throw new Error('Depth taper is too steep for the longitudinal radius.');
+    return function(x){
+      const square=longR*longR-(x-xc)*(x-xc);
+      if(square<=0) throw new Error('Body extends beyond the longitudinal arc.');
+      const d=zc+Math.sqrt(square)-sag(widthFn(x)/2)-offset;
+      if(d<=0) throw new Error('Plate thickness exceeds the calculated body depth.');
+      return x===0?p.neckDepth-offset:x===L?p.tailDepth-offset:d;
+    };
+  }
   const fn=function(x){
     const y=widthFn(x)/2;
     const radial=R*R-(x-cx)*(x-cx)-y*y;

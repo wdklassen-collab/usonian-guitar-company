@@ -31,7 +31,39 @@
       prevY=y;
     }
 
+    const ref=window.usonian00Reference;
+    const traced=document.getElementById('profileSource')?.value==='trace00';
+    if(traced&&ref){
+      const originalLength=sideLength;
+      const bodySamples=samples.slice();
+      const offset=(p.topThickness??0)+(p.backThickness??0)-(p.trimAllowance??0);
+      const interpolate=(a,x,xkey,ykey)=>{
+        if(x<=a[0][xkey]) return a[0][ykey];
+        for(let i=1;i<a.length;i++){
+          if(x<=a[i][xkey]){
+            const t=(x-a[i-1][xkey])/(a[i][xkey]-a[i-1][xkey]);
+            return a[i-1][ykey]+t*(a[i][ykey]-a[i-1][ykey]);
+          }
+        }
+        return a[a.length-1][ykey];
+      };
+      sideLength=ref.sideLength;
+      samples.length=0;
+      for(const [s,d] of ref.side){
+        const originalS=s/sideLength*originalLength;
+        if(d-offset<=0) throw new Error('Plate thickness exceeds the plan template depth.');
+        samples.push({s,d:d-offset,x:interpolate(bodySamples,originalS,'s','x'),w:interpolate(bodySamples,originalS,'s','w')});
+      }
+      // Preserve the full top-view contour; tracing does not simplify it to
+      // the reference's inch-spaced depth stations.
+      return {widthFn,depthFn,samples,sideLength,topSamples:bodySamples,traced:true};
+    }
     return {widthFn,depthFn,samples,sideLength};
+  };
+
+  const originalTop=window.topViewSVG;
+  window.topViewSVG=function(p,g,standalone=false){
+    return originalTop(p,g.topSamples?{...g,samples:g.topSamples}:g,standalone);
   };
 
   window.sideViewSVG=function(p,g,standalone=false){
@@ -89,7 +121,7 @@
       <line x1="${sideL}" y1="${topY}" x2="${sideL}" y2="${tailD}" stroke="#9b5f36"/>
       <text x="3" y="${neckD-4}" font-size="8" fill="#6d655f">Neck side ${neckD.toFixed(1)} mm</text>
       <text x="${Math.max(10,sideL-70)}" y="${tailD-4}" font-size="8" fill="#6d655f">Tail side ${tailD.toFixed(1)} mm</text>
-      <text x="${sideL/2}" y="${maxD+13}" text-anchor="middle" font-size="4" fill="#6d655f">Body side length ${sideL.toFixed(1)} mm · with extensions ${(sideL+p.neckExtension+p.tailExtension).toFixed(1)} mm · inch stations from tail · dashed = straight taper</text>`;
+      <text x="${sideL/2}" y="${maxD+13}" text-anchor="middle" font-size="4" fill="#6d655f">Body side length ${sideL.toFixed(1)} mm · with extensions ${(sideL+p.neckExtension+p.tailExtension).toFixed(1)} mm · inch stations from tail · ${g.traced?"literal plan trace":"calculated back"} · dashed = straight taper</text>`;
 
     if(standalone){
       return `<svg xmlns="http://www.w3.org/2000/svg" width="${vbW}mm" height="${vbH}mm" viewBox="${vbX} ${vbY} ${vbW} ${vbH}"><rect x="${vbX}" y="${vbY}" width="${vbW}" height="${vbH}" fill="white"/>${body}</svg>`;
