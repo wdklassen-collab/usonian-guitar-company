@@ -539,7 +539,7 @@ function render(){
   document.getElementById('statBody').textContent=`Body: ${p.bodyLength.toFixed(1)} mm`;
   document.getElementById('statWidth').textContent=`Lower bout: ${p.lowerBoutWidth.toFixed(1)} mm`;
   document.getElementById('statRadius').textContent=`Back radius: ${(p.backRadius/304.8).toFixed(1)} ft`;
-  document.getElementById('statDepth').textContent=`Depth: ${p.neckDepth.toFixed(1)} → ${p.tailDepth.toFixed(1)} mm`;
+  document.getElementById('statDepth').textContent=`Side depth: ${g.samples[0].d.toFixed(1)} → ${g.samples[g.samples.length-1].d.toFixed(1)} mm`+(Number.isFinite(g.sideLength)?` · Side length: ${(g.sideLength+p.neckExtension+p.tailExtension).toFixed(1)} mm`:'');
 
   const canvas=document.getElementById('canvas');
   if(currentView==='top') canvas.innerHTML=topViewSVG(p,g,false);

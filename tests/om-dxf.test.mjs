@@ -9,7 +9,7 @@ const base=await read('side-template/index.html');
 const presetsSource=await read('side-template/presets.js');
 function setup(){
  const elements=new Map();
- for(const id of ['preset','resetBtn','lowerBoutFrontRadius','lowerBoutRadius','upperBoutNeckRadius','upperBoutWaistRadius','omContourNote'])elements.set(id,{value:'om14',parentElement:{},listeners:{},addEventListener(t,f){this.listeners[t]=f;},appendChild(){}});
+ for(const id of ['preset','resetBtn','topThickness','backThickness','trimAllowance','lowerBoutFrontRadius','lowerBoutRadius','upperBoutNeckRadius','upperBoutWaistRadius','omContourNote'])elements.set(id,{value:'om14',parentElement:{},listeners:{},addEventListener(t,f){this.listeners[t]=f;},appendChild(){}});
  const c={document:{getElementById:id=>elements.get(id),createElement:()=>({})},render(){},makeWidthFunction:()=>()=>123};c.window=c;vm.createContext(c);
  vm.runInContext(presetsSource,c);
  for(const p of Object.values(c.usonianSidePresets))for(const id of Object.keys(p.values))if(!elements.has(id))elements.set(id,{value:0});
@@ -130,4 +130,20 @@ test('plate deductions and trim allowance apply once to profile, endpoints, and 
  assert.ok(svg.includes('L'+(cut.sideLength+15).toFixed(3)+' 97.800'));
  assert.match(svg,/data-station="Waist"/);assert.match(svg,/data-inch="1"/);
  assert.ok(!/NaN|Infinity/.test(svg));
+});
+
+test('the original input render handler reports cutting depths and developed length immediately',()=>{
+ const {c,e}=setup();c.applyUsonianSidePreset('plan00');
+ for(const id of ['statBody','statWidth','statRadius','statDepth','canvas'])e.set(id,{});
+ c.currentView='side';
+ vm.runInContext(base.slice(base.indexOf('function render(){'),base.indexOf('function download(')),c);
+ const inputHandler=c.render;
+ c.render=()=>{throw new Error('input handlers must work without a render wrapper');};
+ e.get('topThickness').value='3';e.get('backThickness').value='2.5';e.get('trimAllowance').value='1';
+ inputHandler();
+ assert.match(e.get('statDepth').textContent,/Side depth: 82.9 → 97.8 mm · Side length: 739.7 mm/);
+ assert.match(e.get('canvas').innerHTML,/Neck side 82.9 mm/);
+ e.get('backRadius').value='0';inputHandler();
+ assert.equal(e.get('statDepth').textContent,'Check dimensions');
+ assert.match(e.get('canvas').textContent,/positive body dimensions/);
 });

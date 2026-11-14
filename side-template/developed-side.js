@@ -118,18 +118,7 @@
     return `<svg viewBox="0 0 ${width} ${totalHeight+2*pad}">${body}</svg>`;
   };
 
-  // Show developed side length in the existing status row and redraw using
-  // the new geometry immediately after this override is injected.
-  const baseRender=window.render;
-  if(typeof baseRender==='function'){
-    window.render=function(){
-      baseRender();
-      const p=window.readInputs();
-      let g;
-      try{ g=window.sampleGeometry(p); }catch{ return; }
-      const stat=document.getElementById('statDepth');
-      if(stat) stat.textContent=`Side depth: ${g.samples[0].d.toFixed(1)} → ${g.samples[g.samples.length-1].d.toFixed(1)} mm · Side length: ${(g.sideLength+p.neckExtension+p.tailExtension).toFixed(1)} mm`;
-    };
-    window.render();
-  }
+  // Existing input listeners retain the original render reference. That
+  // renderer reads these overridden geometry/drawing functions dynamically.
+  if(typeof window.render==='function') window.render();
 })();
