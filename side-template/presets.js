@@ -38,7 +38,7 @@
   function applyPreset(key){
     const preset=presets[key]||presets.om14;
     currentPreset=key in presets?key:'om14';
-    for(const id of ['topThickness','backThickness','trimAllowance','longitudinalRadius']){
+    for(const id of ['topThickness','backThickness','trimAllowance']){
       const el=document.getElementById(id);
       if(el) el.value='0';
     }

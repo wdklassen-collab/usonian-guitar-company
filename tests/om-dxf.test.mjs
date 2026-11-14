@@ -10,7 +10,7 @@ const presetsSource=await read('side-template/presets.js');
 const planSource=await read('side-template/plan00-reference.js');
 function setup(measured=false){
  const elements=new Map();
- for(const id of ['preset','resetBtn','topThickness','backThickness','trimAllowance','longitudinalRadius','profileSource','lowerBoutFrontRadius','lowerBoutRadius','upperBoutNeckRadius','upperBoutWaistRadius','omContourNote'])elements.set(id,{value:'om14',parentElement:{},listeners:{},addEventListener(t,f){this.listeners[t]=f;},appendChild(){}});
+ for(const id of ['preset','resetBtn','topThickness','backThickness','trimAllowance','profileSource','lowerBoutFrontRadius','lowerBoutRadius','upperBoutNeckRadius','upperBoutWaistRadius','omContourNote'])elements.set(id,{value:'om14',parentElement:{},listeners:{},addEventListener(t,f){this.listeners[t]=f;},appendChild(){}});
  const c={document:{getElementById:id=>elements.get(id),querySelector:()=>null,createElement:()=>({})},render(){},makeWidthFunction:()=>()=>123};c.window=c;vm.createContext(c);
  vm.runInContext(presetsSource,c);
  for(const p of Object.values(c.usonianSidePresets))for(const id of Object.keys(p.values))if(!elements.has(id))elements.set(id,{value:0});
@@ -151,9 +151,15 @@ test('the original input render handler reports cutting depths and developed len
  assert.match(e.get('canvas').textContent,/positive body dimensions/);
 });
 
-test('00 measured outline and two-radius surface replace screenshot estimates',()=>{
+test('00 measured outline uses one spherical back radius',()=>{
  const {c}=setup(true);c.applyUsonianSidePreset('plan00');const p=c.readInputs(),g=c.sampleGeometry(p);
- assert.equal(p.backRadius,3657.6);assert.equal(p.longitudinalRadius,4605.3);
+ assert.equal(p.backRadius,3657.6);
+ assert.ok(!base.includes('id="longitudinalRadius"'));
+ assert.ok(!('longitudinalRadius' in p));
+ for(const sample of g.samples){
+  const sphere=g.depthFn.sphere;
+  assert.ok(Math.abs(Math.hypot(sample.x-sphere.cx,sample.w/2,sample.d-sphere.cz)-p.backRadius)<1e-7);
+ }
  assert.ok(Math.abs(p.upperBoutWidth-251.1564)<0.001);
  assert.ok(Math.abs(p.waistWidth-211.8235)<0.001);
  assert.ok(Math.abs(p.lowerBoutWidth-357.4458)<0.001);
