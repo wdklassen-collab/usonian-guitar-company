@@ -85,21 +85,25 @@ for(const order of ['geometry-first','print-first']){
   });
 }
 
-test('route injects geometry before its sole print owner and fails closed if required scripts fail',async()=>{
-  const {GET}=await import('../app/side-template/route.ts');
+test('route bundles checkout sources in order and needs no runtime GitHub fetch',async()=>{
+  const route=await readFile('app/side-template/route.ts','utf8');
+  const bindings={Response};
+  for(const match of route.matchAll(/import (\w+) from '([^']+)\?raw';/g)){
+    bindings[match[1]]=await readFile(new URL('../app/side-template/'+match[2],import.meta.url),'utf8');
+  }
+  const source=route.replace(/^import .*;$/gm,'').replace('export async function GET','async function GET');
+  const context=vm.createContext(bindings);
+  vm.runInContext(source,context);
   const previousFetch=globalThis.fetch;
+  globalThis.fetch=()=>{throw new Error('No network fetch is allowed');};
   try{
-    globalThis.fetch=async url=>new Response(await readFile(new URL(url).pathname.split('/main/')[1],'utf8'));
-    const response=await GET();
+    const response=await context.GET();
     assert.equal(response.status,200);
     const html=await response.text();
     assert.ok(html.indexOf(developedSource)<html.indexOf(printSource));
-    assert.ok(!html.includes('developedPrintTiled'));
-    assert.ok(!html.includes("addEventListener('click',printTiled)"));
-    const localFetch=globalThis.fetch;
-    for(const missing of ['print-fix.js','developed-side.js','om-dxf.js','dread-pdf.js']){
-      globalThis.fetch=url=>url.endsWith(missing)?new Response('',{status:503}):localFetch(url);
-      assert.equal((await GET()).status,502);
-    }
+    assert.ok(html.includes('developed side contours'));
+    assert.ok(!html.includes('raw.githubusercontent.com'));
+    context.developed='';
+    assert.equal((await context.GET()).status,502);
   }finally{globalThis.fetch=previousFetch;}
 });

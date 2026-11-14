@@ -69,6 +69,10 @@
       const i=segment(s[0],sourceX),t=(s[0]-sourceX[i])/(sourceX[i+1]-sourceX[i]);
       return targetX[i]+t*(targetX[i+1]-targetX[i]);
     });
+    // Use the same neck-centerline origin as the plan and Dreadnought.
+    // The DXF outside curve begins at the neck corner, so include the half
+    // neck face without following the excluded CNC joinery notch.
+    fn.samplePoints=[{x:0,w:0},...fn.sampleXs.map(x=>({x,w:fn(x)}))];
     return fn;
   };
   const render=window.render;

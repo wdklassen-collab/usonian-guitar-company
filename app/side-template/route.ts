@@ -1,66 +1,30 @@
-const SOURCE = "https://raw.githubusercontent.com/wdklassen-collab/usonian-guitar-company/main/side-template/index.html";
-const OM_CURVES = "https://raw.githubusercontent.com/wdklassen-collab/usonian-guitar-company/main/side-template/om-curves.js";
-const CURVE_TUNING = "https://raw.githubusercontent.com/wdklassen-collab/usonian-guitar-company/main/side-template/curve-tuning.js";
-const UPPER_CURVES = "https://raw.githubusercontent.com/wdklassen-collab/usonian-guitar-company/main/side-template/upper-curve-handles.js";
-const PRESETS = "https://raw.githubusercontent.com/wdklassen-collab/usonian-guitar-company/main/side-template/presets.js";
-const OM_DEFAULTS = "https://raw.githubusercontent.com/wdklassen-collab/usonian-guitar-company/main/side-template/defaults.js";
-const PRINT_FIX = "https://raw.githubusercontent.com/wdklassen-collab/usonian-guitar-company/main/side-template/print-fix.js";
-const DEVELOPED_SIDE = "https://raw.githubusercontent.com/wdklassen-collab/usonian-guitar-company/main/side-template/developed-side.js";
-
-const OM_DXF = "https://raw.githubusercontent.com/wdklassen-collab/usonian-guitar-company/main/side-template/om-dxf.js";
-
-const DREAD_PDF = "https://raw.githubusercontent.com/wdklassen-collab/usonian-guitar-company/main/side-template/dread-pdf.js";
+// Bundle the exact checkout's sources. A branch preview must never fetch main.
+import sourceHTML from '../../side-template/index.html?raw';
+import curves from '../../side-template/om-curves.js?raw';
+import tuning from '../../side-template/curve-tuning.js?raw';
+import upper from '../../side-template/upper-curve-handles.js?raw';
+import presets from '../../side-template/presets.js?raw';
+import defaults from '../../side-template/defaults.js?raw';
+import dxf from '../../side-template/om-dxf.js?raw';
+import dread from '../../side-template/dread-pdf.js?raw';
+import plan00 from '../../side-template/plan00-reference.js?raw';
+import developed from '../../side-template/developed-side.js?raw';
+import printFix from '../../side-template/print-fix.js?raw';
 
 export async function GET() {
-  const [htmlResponse, curveResponse, tuningResponse, upperResponse, presetsResponse, defaultsResponse, printFixResponse, developedResponse, dxfResponse, dreadResponse] = await Promise.all([
-    fetch(SOURCE, { cache: "no-store" }),
-    fetch(OM_CURVES, { cache: "no-store" }),
-    fetch(CURVE_TUNING, { cache: "no-store" }),
-    fetch(UPPER_CURVES, { cache: "no-store" }),
-    fetch(PRESETS, { cache: "no-store" }),
-    fetch(OM_DEFAULTS, { cache: "no-store" }),
-    fetch(PRINT_FIX, { cache: "no-store" }),
-    fetch(DEVELOPED_SIDE, { cache: "no-store" }),
-    fetch(OM_DXF, { cache: "no-store" }),
-    fetch(DREAD_PDF, { cache: "no-store" }),
-  ]);
-
-  if (!htmlResponse.ok || !developedResponse.ok || !printFixResponse.ok || !dxfResponse.ok || !dreadResponse.ok) {
-    return new Response("Side Template Generator is temporarily unavailable.", {
-      status: 502,
-      headers: { "content-type": "text/plain; charset=utf-8" },
-    });
+  // Preset-aware reset loads before legacy defaults. Geometry precedes print.
+  const scripts = [curves, tuning, upper, presets, defaults, dxf, dread, plan00, developed, printFix];
+  const closingBody = sourceHTML.lastIndexOf('</body>');
+  if (closingBody < 0 || scripts.some(script => !script.trim())) {
+    return new Response('Side Template Generator is temporarily unavailable.', { status: 502 });
   }
-
-  let html = await htmlResponse.text();
-  const scripts: string[] = [];
-
-  if (curveResponse.ok) scripts.push(await curveResponse.text());
-  if (tuningResponse.ok) scripts.push(await tuningResponse.text());
-  if (upperResponse.ok) scripts.push(await upperResponse.text());
-  // Load presets before the legacy OM defaults so preset-aware Reset owns
-  // the capture-phase click handler while initial startup still defaults to OM.
-  if (presetsResponse.ok) scripts.push(await presetsResponse.text());
-  if (defaultsResponse.ok) scripts.push(await defaultsResponse.text());
-  // Geometry loads first. Printing has one owner and reads current geometry
-  // at click time; it never competes with developed-side.js for this button.
-  scripts.push(await dxfResponse.text());
-  scripts.push(await dreadResponse.text());
-  scripts.push(await developedResponse.text());
-  scripts.push(await printFixResponse.text());
-
-  const closingBody = html.lastIndexOf("</body>");
-  if (closingBody !== -1 && scripts.length) {
-    html =
-      html.slice(0, closingBody) +
-      scripts.map((script) => `<script>${script}</script>`).join("") +
-      html.slice(closingBody);
-  }
-
+  const html = sourceHTML.slice(0, closingBody) +
+    scripts.map(script => `<script>${script.replace(/<\/script/gi, '<\\/script')}</script>`).join('') +
+    sourceHTML.slice(closingBody);
   return new Response(html, {
     headers: {
-      "content-type": "text/html; charset=utf-8",
-      "cache-control": "no-store, max-age=0",
+      'content-type': 'text/html; charset=utf-8',
+      'cache-control': 'no-store, max-age=0',
     },
   });
 }
