@@ -41,15 +41,33 @@
     const x1=sideL+p.tailExtension;
     const bodyPts=g.samples.map(sample=>[sample.s,sample.d]);
     const topY=0;
+    const neckD=g.samples[0].d, tailD=g.samples[g.samples.length-1].d;
+    const stationAt=x=>{
+      let i=1;
+      while(i<g.samples.length-1 && g.samples[i].x<x) i++;
+      const a=g.samples[i-1],b=g.samples[i];
+      const t=b.x===a.x?0:(x-a.x)/(b.x-a.x);
+      return {s:a.s+t*(b.s-a.s),d:a.d+t*(b.d-a.d)};
+    };
+    const stations=[['Upper bout',p.upperBoutPos],['Waist',p.waistPos],['Lower bout',p.lowerBoutPos]];
+    const markers=stations.filter(([,x])=>Number.isFinite(x)).map(([name,x])=>{
+      const point=stationAt(x);
+      return `<g data-station="${name}"><line x1="${point.s}" y1="0" x2="${point.s}" y2="${point.d}" stroke="#41679b" stroke-width="0.3"/><text x="${point.s+2}" y="12" font-size="3" fill="#41679b" transform="rotate(90 ${point.s+2} 12)">${name}</text></g>`;
+    }).join('');
+    let grid='';
+    for(let inch=1;inch*25.4<sideL;inch++){
+      const x=sideL-inch*25.4;
+      grid+=`<g data-inch="${inch}"><line x1="${x}" y1="0" x2="${x}" y2="${Math.max(...g.samples.map(s=>s.d))}" stroke="#d8b18f" stroke-width="0.15"/><text x="${x}" y="-3" text-anchor="middle" font-size="3" fill="#6d655f">${inch}</text></g>`;
+    }
 
     const shape=[
       [x0,topY],
       [x1,topY],
-      [x1,p.tailDepth],
-      [sideL,p.tailDepth],
+      [x1,tailD],
+      [sideL,tailD],
       ...[...bodyPts].reverse(),
-      [0,p.neckDepth],
-      [x0,p.neckDepth]
+      [0,neckD],
+      [x0,neckD]
     ];
 
     const maxD=Math.max(...g.samples.map(sample=>sample.d),p.neckDepth,p.tailDepth);
@@ -61,14 +79,17 @@
     const backPath=pathFromPoints(bodyPts);
 
     const body=`
+      ${grid}
       <path d="${profilePath}" fill="none" stroke="#26221f" stroke-width="1.2"/>
       <path d="${backPath}" fill="none" stroke="#9b5f36" stroke-width="1.1"/>
+      ${markers}
+      <line x1="0" y1="${neckD}" x2="${sideL}" y2="${tailD}" stroke="#777" stroke-width="0.3" stroke-dasharray="3 2"/>
       <line x1="0" y1="${topY}" x2="${sideL}" y2="${topY}" stroke="#b8b0a8" stroke-dasharray="4 4"/>
-      <line x1="0" y1="${topY}" x2="0" y2="${p.neckDepth}" stroke="#9b5f36"/>
-      <line x1="${sideL}" y1="${topY}" x2="${sideL}" y2="${p.tailDepth}" stroke="#9b5f36"/>
-      <text x="3" y="${p.neckDepth-4}" font-size="8" fill="#6d655f">Neck ${p.neckDepth.toFixed(1)} mm</text>
-      <text x="${Math.max(10,sideL-70)}" y="${p.tailDepth-4}" font-size="8" fill="#6d655f">Tail ${p.tailDepth.toFixed(1)} mm</text>
-      <text x="${sideL/2}" y="${maxD+13}" text-anchor="middle" font-size="8" fill="#6d655f">Top edge length ${(sideL+p.neckExtension+p.tailExtension).toFixed(1)} mm</text>`;
+      <line x1="0" y1="${topY}" x2="0" y2="${neckD}" stroke="#9b5f36"/>
+      <line x1="${sideL}" y1="${topY}" x2="${sideL}" y2="${tailD}" stroke="#9b5f36"/>
+      <text x="3" y="${neckD-4}" font-size="8" fill="#6d655f">Neck side ${neckD.toFixed(1)} mm</text>
+      <text x="${Math.max(10,sideL-70)}" y="${tailD-4}" font-size="8" fill="#6d655f">Tail side ${tailD.toFixed(1)} mm</text>
+      <text x="${sideL/2}" y="${maxD+13}" text-anchor="middle" font-size="4" fill="#6d655f">Body side length ${sideL.toFixed(1)} mm · with extensions ${(sideL+p.neckExtension+p.tailExtension).toFixed(1)} mm · inch stations from tail · dashed = straight taper</text>`;
 
     if(standalone){
       return `<svg xmlns="http://www.w3.org/2000/svg" width="${vbW}mm" height="${vbH}mm" viewBox="${vbX} ${vbY} ${vbW} ${vbH}"><rect x="${vbX}" y="${vbY}" width="${vbW}" height="${vbH}" fill="white"/>${body}</svg>`;
@@ -104,9 +125,10 @@
     window.render=function(){
       baseRender();
       const p=window.readInputs();
-      const g=window.sampleGeometry(p);
+      let g;
+      try{ g=window.sampleGeometry(p); }catch{ return; }
       const stat=document.getElementById('statDepth');
-      if(stat) stat.textContent=`Depth: ${p.neckDepth.toFixed(1)} → ${p.tailDepth.toFixed(1)} mm · Top edge: ${(g.sideLength+p.neckExtension+p.tailExtension).toFixed(1)} mm`;
+      if(stat) stat.textContent=`Side depth: ${g.samples[0].d.toFixed(1)} → ${g.samples[g.samples.length-1].d.toFixed(1)} mm · Side length: ${(g.sideLength+p.neckExtension+p.tailExtension).toFixed(1)} mm`;
     };
     window.render();
   }

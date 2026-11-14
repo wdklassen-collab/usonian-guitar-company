@@ -36,7 +36,7 @@ test('DXF outside curve is preserved at 485.8 mm, with no neck-notch detour',()=
  const top=c.topViewSVG(p,g,true),side=c.sideViewSVG(p,g,true),combined=c.combinedSVG(p,g,true);
  for(const svg of [top,side,combined])assert.ok(!/NaN|Infinity/.test(svg));
  for(const s of g.samples.slice(1,10))assert.ok(top.includes((-s.w/2).toFixed(3))&&top.includes((s.w/2).toFixed(3)));
- assert.ok(side.includes(g.sideLength.toFixed(1)));
+ assert.ok(side.includes('Body side length '+g.sideLength.toFixed(1)));
  console.log('OM developed length:',g.sideLength.toFixed(3),'mm; with default extensions:',(g.sideLength+50).toFixed(3),'mm');
 });
 test('OM edits and reset use the reference; Dreadnought uses the unchanged prior curve',()=>{
@@ -85,4 +85,49 @@ test('Dreadnought plan contour matches 771 mm template and preserves OM on switc
  e.get('resetBtn').listeners.click({preventDefault(){},stopImmediatePropagation(){}});assert.equal(c.sampleGeometry(c.readInputs()).sideLength,g.sideLength);
  c.applyUsonianSidePreset('om14');assert.equal(c.sampleGeometry(c.readInputs()).sideLength,omLength);
  console.log('Dreadnought developed length:',g.sideLength.toFixed(3),'mm; including extensions:',(g.sideLength+50).toFixed(3),'mm');
+});
+
+// These checks validate the physical sphere independently of the generator's
+// unrolling and drawing, so a transverse-only sag correction cannot pass.
+test('rim samples lie on one sphere, and equal end depths are deepest near the waist',()=>{
+ const {c}=setup();
+ c.applyUsonianSidePreset('plan00');
+ const p={...c.readInputs(),neckDepth:100,tailDepth:100};
+ const g=c.sampleGeometry(p),sphere=g.depthFn.sphere;
+ for(const sample of g.samples){
+  const r=Math.hypot(sample.x-sphere.cx,sample.w/2,sample.d-sphere.cz);
+  assert.ok(Math.abs(r-p.backRadius)<1e-7,'every rim point lies on the same sphere');
+ }
+ assert.ok(g.depthFn(p.waistPos)>g.depthFn(p.lowerBoutPos)+2);
+ assert.equal(g.depthFn(0),100);assert.equal(g.depthFn(500),100);
+ const tapered=c.sampleGeometry(c.readInputs());
+ for(const sample of tapered.samples){
+  const s=tapered.depthFn.sphere;
+  assert.ok(Math.abs(Math.hypot(sample.x-s.cx,sample.w/2,sample.d-s.cz)-p.backRadius)<1e-7);
+ }
+ console.log('00 comparison:',tapered.sideLength.toFixed(3),'mm; upper/waist/lower depths:',
+   [p.upperBoutPos,p.waistPos,p.lowerBoutPos].map(x=>tapered.depthFn(x).toFixed(3)).join(' / '));
+});
+
+test('large radius approaches a straight body-axis taper; invalid geometry is rejected',()=>{
+ const {c}=setup();c.applyUsonianSidePreset('plan00');const p=c.readInputs();
+ const flat=c.sampleGeometry({...p,backRadius:1e8});
+ for(const s of flat.samples) assert.ok(Math.abs(s.d-(p.neckDepth+(p.tailDepth-p.neckDepth)*s.x/p.bodyLength))<0.001);
+ for(const changes of [{backRadius:0},{backRadius:200},{bodyLength:0},{waistPos:20},{topThickness:-1},{backThickness:200},{tailDepth:10000}]){
+  assert.throws(()=>c.sampleGeometry({...p,...changes}));
+ }
+});
+
+test('plate deductions and trim allowance apply once to profile, endpoints, and exported extensions',()=>{
+ const {c}=setup();c.applyUsonianSidePreset('plan00');const p=c.readInputs(),g=c.sampleGeometry(p);
+ const cutP={...p,topThickness:3,backThickness:2.5,trimAllowance:1,neckExtension:12,tailExtension:15};
+ const cut=c.sampleGeometry(cutP);
+ assert.equal(cut.sideLength,g.sideLength);
+ for(let i=0;i<cut.samples.length;i++)assert.ok(Math.abs(cut.samples[i].d-g.samples[i].d+4.5)<1e-8);
+ const svg=c.sideViewSVG(cutP,cut,true);
+ assert.match(svg,/Neck side 82.9 mm/);assert.match(svg,/Tail side 97.8 mm/);
+ assert.ok(svg.includes('L-12.000 82.900'));
+ assert.ok(svg.includes('L'+(cut.sideLength+15).toFixed(3)+' 97.800'));
+ assert.match(svg,/data-station="Waist"/);assert.match(svg,/data-inch="1"/);
+ assert.ok(!/NaN|Infinity/.test(svg));
 });

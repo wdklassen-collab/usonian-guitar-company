@@ -140,7 +140,7 @@
 <body>
 <header>
   <h1>Usonian Side Template Generator</h1>
-  <p>OM-14 defaults · geometry-driven body outline · radiused back side profile</p>
+  <p>Geometry-driven body outline · spherical back dish · developed side contour</p>
 </header>
 
 <main>
@@ -166,7 +166,12 @@
       <label>Tail Depth (mm)<input id="tailDepth" type="number" step="0.1"></label>
       <label>Neck Extension (mm)<input id="neckExtension" type="number" step="0.1"></label>
       <label>Tail Extension (mm)<input id="tailExtension" type="number" step="0.1"></label>
+      <label>Top Thickness (mm)<input id="topThickness" type="number" min="0" step="0.1"></label>
+      <label>Back Thickness (mm)<input id="backThickness" type="number" min="0" step="0.1"></label>
+      <label>Trimming Allowance (mm)<input id="trimAllowance" type="number" min="0" step="0.1"></label>
     </div>
+    <p class="note">Neck and tail depths are finished outside body depths at the outline ends. Side cutting depth subtracts both plate thicknesses and adds the trimming allowance. Top edge is flat. Positions are measured from the neck; side stations count from the tail.</p>
+    <p class="note" id="referenceNote" hidden>00 plan comparison uses approximate readings from the supplied image, reshaped from the OM outline. The 15 ft back radius is assumed. This is not a traced 00 outline; its side length is calculated, not forced to 730 mm.</p>
   </div>
 
   <div class="group">
@@ -232,7 +237,10 @@ const defaults = {
   waistPos: 248,
   lowerBoutWidth: 387,
   lowerBoutPos: 372,
-  tailBlockWidth: 123
+  tailBlockWidth: 123,
+  topThickness: 0,
+  backThickness: 0,
+  trimAllowance: 0
 };
 
 const inputIds = Object.keys(defaults);
@@ -350,16 +358,41 @@ function sagittaFromHalfWidth(halfWidth, R){
 }
 
 function makeSideDepthFunction(p, widthFn){
-  const s0 = sagittaFromHalfWidth(widthFn(0)/2, p.backRadius);
-  const sL = sagittaFromHalfWidth(widthFn(p.bodyLength)/2, p.backRadius);
-
-  return function(x){
-    const t = p.bodyLength ? x/p.bodyLength : 0;
-    const linear = p.neckDepth + (p.tailDepth-p.neckDepth)*t;
-    const s = sagittaFromHalfWidth(widthFn(x)/2, p.backRadius);
-    const sBase = s0 + (sL-s0)*t;
-    return linear + (s-sBase);
+  // Intersect one sphere with the rim, rather than adding transverse sag
+  // to a taper. Positive depth is down from the flat top. The sphere center
+  // is on the body's symmetry plane; select its lower surface at the rim.
+  const L=p.bodyLength, R=p.backRadius;
+  const top=p.topThickness??0, back=p.backThickness??0, trim=p.trimAllowance??0;
+  if(![L,R,p.neckDepth,p.tailDepth,p.neckExtension,p.tailExtension,top,back,trim,
+      p.neckBlockWidth,p.tailBlockWidth,p.upperBoutWidth,p.waistWidth,p.lowerBoutWidth,
+      p.upperBoutPos,p.waistPos,p.lowerBoutPos].every(Number.isFinite) || L<=3 || R<=0 ||
+     p.neckDepth<=0 || p.tailDepth<=0 || p.neckExtension<0 || p.tailExtension<0 ||
+     top<0 || back<0 || trim<0 ||
+     [p.neckBlockWidth,p.tailBlockWidth,p.upperBoutWidth,p.waistWidth,p.lowerBoutWidth].some(v=>v<0) ||
+     !(0<p.upperBoutPos && p.upperBoutPos<p.waistPos && p.waistPos<p.lowerBoutPos && p.lowerBoutPos<L)){
+    throw new Error('Enter positive body dimensions and radius, ordered bout positions, and nonnegative thicknesses and allowances.');
+  }
+  const yN=widthFn(0)/2, yT=widthFn(L)/2;
+  const delta=p.tailDepth-p.neckDepth, chord=Math.hypot(L,delta);
+  const a=(yT*yT-yN*yN+chord*chord)/(2*chord);
+  const h2=R*R-yN*yN-a*a;
+  if(h2<=0) throw new Error('Back radius is too small for these dimensions.');
+  const h=Math.sqrt(h2);
+  const cx=a*L/chord+h*delta/chord;
+  const cz=p.neckDepth+a*delta/chord-h*L/chord;
+  if(cz>=Math.min(p.neckDepth,p.tailDepth)) throw new Error('Depth taper is too steep for this back radius.');
+  const offset=top+back-trim;
+  const fn=function(x){
+    const y=widthFn(x)/2;
+    const radial=R*R-(x-cx)*(x-cx)-y*y;
+    if(radial<=0) throw new Error('Body outline extends beyond the back sphere.');
+    const depth=cz+Math.sqrt(radial)-offset;
+    if(depth<=0) throw new Error('Plate thickness exceeds the calculated body depth.');
+    // Exact endpoints avoid floating-point drift in dimensions and exports.
+    return x===0?p.neckDepth-offset:x===L?p.tailDepth-offset:depth;
   };
+  fn.sphere={cx,cz,radius:R};
+  return fn;
 }
 
 function sampleGeometry(p){
@@ -495,7 +528,13 @@ function combinedSVG(p,g,standalone=false){
 
 function render(){
   const p=readInputs();
-  const g=sampleGeometry(p);
+  let g;
+  try{ g=sampleGeometry(p); }
+  catch(error){
+    document.getElementById('canvas').textContent=error.message;
+    document.getElementById('statDepth').textContent='Check dimensions';
+    return;
+  }
 
   document.getElementById('statBody').textContent=`Body: ${p.bodyLength.toFixed(1)} mm`;
   document.getElementById('statWidth').textContent=`Lower bout: ${p.lowerBoutWidth.toFixed(1)} mm`;

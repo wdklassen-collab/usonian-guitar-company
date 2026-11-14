@@ -11,6 +11,16 @@
         upperBoutNeckRadius:140,upperBoutWaistRadius:140,lowerBoutFrontRadius:140,lowerBoutRadius:140
       }
     },
+    plan00:{
+      label:'00 plan comparison (approx.)',
+      values:{
+        bodyLength:500,backRadius:4572,neckDepth:87.4,tailDepth:102.3,
+        neckExtension:0,tailExtension:0,neckBlockWidth:0,tailBlockWidth:0,
+        upperBoutWidth:279.6,upperBoutPos:81,waistWidth:229.8,waistPos:186,
+        lowerBoutWidth:355.6,lowerBoutPos:356,
+        upperBoutNeckRadius:140,upperBoutWaistRadius:140,lowerBoutFrontRadius:140,lowerBoutRadius:140
+      }
+    },
     dread14:{
       label:'Dreadnought',
       values:{
@@ -28,6 +38,12 @@
   function applyPreset(key){
     const preset=presets[key]||presets.om14;
     currentPreset=key in presets?key:'om14';
+    for(const id of ['topThickness','backThickness','trimAllowance']){
+      const el=document.getElementById(id);
+      if(el) el.value='0';
+    }
+    const note=document.getElementById('referenceNote');
+    if(note) note.hidden=currentPreset!=='plan00';
     Object.entries(preset.values).forEach(([id,value])=>{
       const el=document.getElementById(id);
       if(el) el.value=String(value);
