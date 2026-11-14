@@ -10,7 +10,7 @@ Side X is accumulated top-view perimeter distance. The top edge is flat; sides a
 
 Numeric polylines were extracted directly from sheet 05 at 25.4/72 mm per PDF point. No PDF page, artwork, notes, or photographs are bundled. The body outline is calibrated to its printed 500 mm length. A 0.155 mm neck-front overhang is omitted for a single-valued width function. Its resulting half-perimeter is 729.491 mm. Body widths from this template are 251.156 / 211.824 / 357.446 mm; these differ slightly from dimension text on other sheets.
 
-The transverse back arch is labeled R3657.6 mm (12 ft) on sheets 02 and 05. The longitudinal back arc is labeled R4605.3 mm on sheet 02. The measured 00 preset uses the 12 ft back radius for its single spherical calculation. The second radius remains source provenance only and is not an input or hidden calculation setting. Literal trace mode retains the original drawing independently.
+The transverse back arch is labeled R3657.6 mm (12 ft) on sheets 02 and 05. The longitudinal back arc is labeled R4605.3 mm on sheet 02. The measured 00 preset defaults to a 15 ft spherical back radius; the source plan specifies 12 ft and can be tested by entering that value. The second radius remains source provenance only and is not an input or hidden calculation setting. Literal trace mode retains the original drawing independently.
 
 The drawn side polyline is 729.967545 mm long, with end depths 87.367336 and 102.400355 mm. The printed labels say 730, 87.4, and 102.3 mm. Preserve these small drafting discrepancies rather than silently distorting the source curve. The reference has a conspicuous local kink at s348.966942, depth100.200360 mm. A calculated smooth surface need not reproduce that kink.
 
@@ -30,6 +30,6 @@ The supplied sheet 05 side measures 749.020755 mm; its printed dimension is 749 
 
 ## Named presets
 
-The selector lists OM-14, Dreadnought-14, and 00-14, in that order. All use a single 3657.6 mm (12 ft) back radius, zero end extensions, and zero plate/trim adjustments by default, matching validation settings. OM-14: 485.8 mm body, 79.3/104.5 mm finished end depths. Dreadnought-14: 513.3 mm body, 95.3/120.7 mm end depths. 00-14: 500 mm body and the extracted 87.367336/102.400355 mm end depths. Measured outline sources and registration stations are retained.
+The selector lists OM-14, Dreadnought-14, and 00-14, in that order. All default to a single 4572 mm (15 ft) back radius, zero end extensions, and zero plate/trim adjustments by default, using the requested 15 ft default. Validation against the supplied plans explicitly uses their 12 ft arch radius. OM-14: 485.8 mm body, 79.3/104.5 mm finished end depths. Dreadnought-14: 513.3 mm body, 95.3/120.7 mm end depths. 00-14: 500 mm body and the extracted 87.367336/102.400355 mm end depths. Measured outline sources and registration stations are retained.
 
 Startup and Reset share the canonical preset values. Preset selection remains available in literal-trace mode; selecting OM-14 or Dreadnought-14 returns to calculated mode automatically. The explicit 00 literal trace remains available separately.

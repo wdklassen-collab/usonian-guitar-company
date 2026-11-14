@@ -4,7 +4,7 @@
     om14:{
       label:'OM-14',
       values:{
-        bodyLength:485.8,backRadius:3657.6,neckDepth:79.3,tailDepth:104.5,
+        bodyLength:485.8,backRadius:4572,neckDepth:79.3,tailDepth:104.5,
         neckExtension:0,tailExtension:0,neckBlockWidth:18.9987,tailBlockWidth:0,
         upperBoutWidth:288.7096,upperBoutPos:81.0238,waistWidth:234.3475,waistPos:162.0503,
         lowerBoutWidth:381.1829,lowerBoutPos:349.5777,
@@ -14,7 +14,7 @@
     plan00:{
       label:'00-14',
       values:{
-        bodyLength:500,backRadius:3657.6,neckDepth:87.36733623080782,tailDepth:102.40035489400226,
+        bodyLength:500,backRadius:4572,neckDepth:87.36733623080782,tailDepth:102.40035489400226,
         neckExtension:0,tailExtension:0,neckBlockWidth:0,tailBlockWidth:0,
         upperBoutWidth:251.15639665391708,upperBoutPos:88.54932948403555,waistWidth:211.82354770236543,waistPos:186.09009273891584,
         lowerBoutWidth:357.4457583533393,lowerBoutPos:363.4637815191076,
@@ -24,7 +24,7 @@
     dread14:{
       label:'Dreadnought-14',
       values:{
-        bodyLength:513.3,backRadius:3657.6,neckDepth:95.3,tailDepth:120.7,
+        bodyLength:513.3,backRadius:4572,neckDepth:95.3,tailDepth:120.7,
         neckExtension:0,tailExtension:0,neckBlockWidth:54.5260833,tailBlockWidth:0,
         upperBoutWidth:293.39804824,upperBoutPos:83.41313988,waistWidth:273.87561842,waistPos:168.11659529,
         lowerBoutWidth:396.83620628,lowerBoutPos:379.32476986,

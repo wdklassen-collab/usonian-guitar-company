@@ -21,7 +21,7 @@
   const lower=ref.body.filter(p=>p[0]>250&&p[0]<450).reduce((a,b)=>a[1]>b[1]?a:b);
   const preset=window.usonianSidePresets.plan00;
   Object.assign(preset.values,{
-    bodyLength:500,backRadius:ref.backRadius,
+    bodyLength:500,backRadius:4572,
     neckDepth:ref.neckDepth,tailDepth:ref.tailDepth,
     upperBoutWidth:upper[1]*2,upperBoutPos:upper[0],waistWidth:waist[1]*2,waistPos:waist[0],
     lowerBoutWidth:lower[1]*2,lowerBoutPos:lower[0]
@@ -30,7 +30,7 @@
   const option=document.querySelector('#preset option[value="plan00"]');
   if(option) option.textContent=preset.label;
   const note=document.getElementById('referenceNote');
-  if(note) note.textContent='Measured from sheet 05 of Binder00-14.pdf. Back radius: 12 ft. Calculated mode uses one spherical radius and the measured body outline. Plan trace mode reproduces the drawn side contour, including its small drafting irregularities. Drawn side length is 729.968 mm (label: 730); drawn tail depth is 102.400 mm (label: 102.3).';
+  if(note) note.textContent='Measured from sheet 05 of Binder00-14.pdf. Plan back arch: 12 ft; preset default: 15 ft. Calculated mode uses one spherical radius and the measured body outline. Plan trace mode reproduces the drawn side contour, including its small drafting irregularities. Drawn side length is 729.968 mm (label: 730); drawn tail depth is 102.400 mm (label: 102.3).';
   const previousWidth=window.makeWidthFunction;
   window.makeWidthFunction=function(p){
     if(document.getElementById('preset')?.value!=='plan00') return previousWidth(p);

@@ -155,7 +155,7 @@ test('the original input render handler reports cutting depths and developed len
 
 test('00 measured outline uses one spherical back radius',()=>{
  const {c}=setup(true);c.applyUsonianSidePreset('plan00');const p=c.readInputs(),g=c.sampleGeometry(p);
- assert.equal(p.backRadius,3657.6);
+ assert.equal(p.backRadius,4572);
  assert.ok(!base.includes('id="longitudinalRadius"'));
  assert.ok(!('longitudinalRadius' in p));
  for(const sample of g.samples){
@@ -206,10 +206,10 @@ test('the three named presets restore tested dimensions, one radius, and zero ex
   c.applyUsonianSidePreset(key);let p=c.readInputs();
   assert.equal(c.usonianSidePresets[key].label,label);
   assert.equal(p.bodyLength,length);assert.equal(p.neckDepth,neck);assert.equal(p.tailDepth,tail);
-  assert.equal(p.backRadius,3657.6);assert.equal(p.neckExtension,0);assert.equal(p.tailExtension,0);
+  assert.equal(p.backRadius,4572);assert.equal(p.neckExtension,0);assert.equal(p.tailExtension,0);
   e.get('bodyLength').value=600;e.get('backRadius').value=4500;e.get('topThickness').value=3;
   e.get('resetBtn').listeners.click({preventDefault(){},stopImmediatePropagation(){}});
-  p=c.readInputs();assert.equal(p.bodyLength,length);assert.equal(p.backRadius,3657.6);assert.equal(p.topThickness,0);
+  p=c.readInputs();assert.equal(p.bodyLength,length);assert.equal(p.backRadius,4572);assert.equal(p.topThickness,0);
  }
  e.get('profileSource').value='trace00';e.get('profileSource').listeners.change();
  assert.equal(e.get('bodyLength').disabled,true);
