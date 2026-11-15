@@ -59,6 +59,12 @@ export default defineConfig(async ({ command }) => {
         inspectorPort: false,
         config: {
           ...localBindingConfig,
+          ...(process.env.USONIAN_TEST_SITE === "1" ? {
+            name: "usonian-guitar-test",
+            routes: [],
+            workers_dev: true,
+            vars: { USONIAN_TEST_SITE: "1", RUST_API_URL: "https://usonian-luthier-api-preview.wdklassen.workers.dev" },
+          } : {}),
           // Development-only forwarding; production uses runtime settings.
           ...(command === "serve" && process.env.RUST_API_URL
             ? { vars: { RUST_API_URL: process.env.RUST_API_URL } }

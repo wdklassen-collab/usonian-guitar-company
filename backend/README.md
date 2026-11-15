@@ -168,3 +168,7 @@ Verify the returned URL's `/api/v1/health` and a side request, then set
 `RUST_API_URL=https://<verified-preview-worker-host>` on an isolated website preview.
 Do not put a Worker URL into the browser bundle and do not change production
 runtime configuration for this branch. No repository CI workflow deploys anything.
+
+## Persistent test environment
+
+The dedicated website Worker is `usonian-guitar-test`, built from `feature/rust-backend` with `USONIAN_TEST_SITE=1 npm run build` and deployed with `node scripts/deploy-test.mjs`. Its only custom domain is `test.usonianguitar.com`. The guarded deployment script refuses ordinary production artifacts. The API is the separate `usonian-luthier-api-preview` Worker, built with `bash backend/scripts/cloudflare-build.sh` and deployed with `npx wrangler deploy --config backend/cloudflare/wrangler.jsonc`. Neither service uses production storage. Test HTML has a banner and responses have an X-Robots-Tag noindex header. Production builds do not enable these settings.
