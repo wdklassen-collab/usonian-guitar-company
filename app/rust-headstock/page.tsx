@@ -21,7 +21,7 @@ type Shape=keyof typeof shapes;
 function defaults(name:Shape='arch'):Params{const s=shapes[name];return {length:180,nutWidth:44.45,shoulderWidth:62,shoulderHeight:28,crownWidth:70,crownHeight:s.height,leftBulge:0,rightBulge:0,transition:.55,minimumWeb:3,symmetric:s.symmetric,crown:s.crown.map(p=>({...p})),slots:{enabled:true,width:15,length:105,start:43,spacing:38,splay:0},tuners:{layout:'threePerSide',diameter:6,first:60,pitch:35,inset:10}};}
 function mirror(segments:Segment[]){let start={x:-1,y:0};const starts=segments.map(s=>{const old=start;start=s;return old;});return [...segments,...segments.map((s,i)=>({...s,x:-starts[i].x,y:starts[i].y,c1x:-s.c2x,c1y:s.c2y,c2x:-s.c1x,c2y:s.c1y})).reverse()];}
 function download(text:string,type:string,name:string){const url=URL.createObjectURL(new Blob([text],{type}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
-const inner=(svg:string)=>svg.replace(/^.*?<svg[^>]*>/s,'').replace(/<\/svg>\s*$/,'');
+const inner=(svg:string)=>svg.replace(/^[\s\S]*?<svg[^>]*>/,'').replace(/<\/svg>\s*$/,'');
 export default function HeadstockGenerator(){
   const [p,setP]=useState<Params>(defaults);const [preset,setPreset]=useState<Shape>('arch');
   const [result,setResult]=useState<{key:string;data:Geometry}|null>(null);const [message,setMessage]=useState('Connecting to Rust…');const [error,setError]=useState(false);
