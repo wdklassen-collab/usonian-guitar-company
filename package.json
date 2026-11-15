@@ -16,7 +16,12 @@
     "db:generate": "bash scripts/sites-env.sh -- drizzle-kit generate",
     "build:cnc": "node scripts/build-cnc.mjs && node --test tests/cnc-import-ui.test.mjs",
     "test:cnc": "node --test tests/cnc-template.test.mjs",
-    "prebuild": "npm run test:cnc && npm run build:cnc"
+    "prebuild": "npm run test:cnc && npm run build:cnc",
+    "backend:build": "bash backend/scripts/build-wasm.sh",
+    "backend:test": "node backend/scripts/references.mjs --check && cargo +1.91.1 test --locked --manifest-path backend/Cargo.toml && cargo +1.91.1 build --locked --manifest-path backend/Cargo.toml --bin generate && npm run backend:build && node --test backend/tests/*.test.mjs tests/om-dxf.test.mjs tests/side-print.test.mjs",
+    "backend:dev": "wrangler dev --config backend/cloudflare/wrangler.jsonc --local --port 8787 --ip 127.0.0.1",
+    "backend:dry-run": "wrangler deploy --config backend/cloudflare/wrangler.jsonc --dry-run --outdir ../target/worker-dry-run",
+    "backend:smoke": "node backend/tests/local-smoke.mjs"
   },
   "dependencies": {
     "clipper-lib": "6.4.2",

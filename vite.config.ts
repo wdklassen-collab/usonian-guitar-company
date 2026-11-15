@@ -33,7 +33,7 @@ const localBindingConfig = {
     : [],
 };
 
-export default defineConfig(async () => {
+export default defineConfig(async ({ command }) => {
   // Keep Wrangler and Miniflare state project-local. These are non-secret tool
   // settings; application environment belongs in ignored `.env*` files.
   process.env.WRANGLER_WRITE_LOGS ??= "false";
@@ -57,7 +57,19 @@ export default defineConfig(async () => {
       cloudflare({
         viteEnvironment: { name: "rsc", childEnvironments: ["ssr"] },
         inspectorPort: false,
-        config: localBindingConfig,
+        config: {
+          ...localBindingConfig,
+          ...(process.env.USONIAN_TEST_SITE === "1" ? {
+            name: "usonian-guitar-test",
+            routes: [],
+            workers_dev: true,
+            vars: { USONIAN_TEST_SITE: "1", RUST_API_URL: "https://usonian-luthier-api-preview.wdklassen.workers.dev" },
+          } : {}),
+          // Development-only forwarding; production uses runtime settings.
+          ...(command === "serve" && process.env.RUST_API_URL
+            ? { vars: { RUST_API_URL: process.env.RUST_API_URL } }
+            : {}),
+        },
       }),
     ],
   };

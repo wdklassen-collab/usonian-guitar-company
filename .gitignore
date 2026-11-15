@@ -43,3 +43,8 @@ next-env.d.ts
 
 # TypeScript incremental cache
 *.tsbuildinfo
+
+# Reproducible Rust outputs
+/backend/target/
+/backend/pkg/
+/backend/cloudflare/.wrangler/

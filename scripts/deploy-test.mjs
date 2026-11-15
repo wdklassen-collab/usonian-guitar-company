@@ -1,0 +1,11 @@
+import { readFile, writeFile } from 'node:fs/promises';
+import { spawnSync } from 'node:child_process';
+const path = 'dist/server/wrangler.json';
+const config = JSON.parse(await readFile(path, 'utf8'));
+if (config.name !== 'usonian-guitar-test' || config.vars?.USONIAN_TEST_SITE !== '1') throw new Error('Refusing deployment: build with USONIAN_TEST_SITE=1 first.');
+config.routes = [{ pattern: 'test.usonianguitar.com', custom_domain: true }];
+config.workers_dev = true;
+config.vars.RUST_API_URL = 'https://usonian-luthier-api-preview.wdklassen.workers.dev';
+await writeFile(path, JSON.stringify(config, null, 2));
+const result = spawnSync('npx', ['wrangler', 'deploy', '--config', path], { stdio: 'inherit' });
+process.exit(result.status ?? 1);
