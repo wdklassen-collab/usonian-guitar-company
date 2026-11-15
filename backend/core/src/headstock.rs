@@ -257,15 +257,26 @@ pub fn headstock(p: HeadstockRequest) -> Result<Headstock> {
     let left = -p.shoulder_width / 2.0;
     let right = p.shoulder_width / 2.0;
     let span = crown_base - p.shoulder_height;
+    // Linear interpolation at thirds makes zero bulge an exact straight side.
+    // Equal 4/3 handle offsets produce the requested midpoint bulge in mm.
+    let left_delta = -p.crown_width / 2.0 - left;
+    let left_c1 = left + left_delta / 3.0 - p.left_bulge * 4.0 / 3.0;
+    let blend = p.shoulder_height * p.transition / (span / 3.0);
     let mut outline = Path::new([-p.nut_width / 2.0, 0.0]);
     outline.curve(
         [-p.nut_width / 2.0, p.shoulder_height * p.transition],
-        [left, p.shoulder_height * (1.0 - p.transition)],
+        [
+            left - (left_c1 - left) * blend,
+            p.shoulder_height * (1.0 - p.transition),
+        ],
         [left, p.shoulder_height],
     );
     outline.curve(
-        [left - p.left_bulge, p.shoulder_height + span / 3.0],
-        [-p.crown_width / 2.0 - p.left_bulge, crown_base - span / 3.0],
+        [left_c1, p.shoulder_height + span / 3.0],
+        [
+            left + 2.0 * left_delta / 3.0 - p.left_bulge * 4.0 / 3.0,
+            crown_base - span / 3.0,
+        ],
         [-p.crown_width / 2.0, crown_base],
     );
     let map = |x: f64, y: f64| [x * p.crown_width / 2.0, crown_base + y * p.crown_height];
@@ -298,13 +309,21 @@ pub fn headstock(p: HeadstockRequest) -> Result<Headstock> {
     } else {
         p.right_bulge
     };
+    let right_delta = p.crown_width / 2.0 - right;
+    let right_c2 = right + right_delta / 3.0 + bulge * 4.0 / 3.0;
     outline.curve(
-        [p.crown_width / 2.0 + bulge, crown_base - span / 3.0],
-        [right + bulge, p.shoulder_height + span / 3.0],
+        [
+            right + 2.0 * right_delta / 3.0 + bulge * 4.0 / 3.0,
+            crown_base - span / 3.0,
+        ],
+        [right_c2, p.shoulder_height + span / 3.0],
         [right, p.shoulder_height],
     );
     outline.curve(
-        [right, p.shoulder_height * (1.0 - p.transition)],
+        [
+            right + (right - right_c2) * blend,
+            p.shoulder_height * (1.0 - p.transition),
+        ],
         [p.nut_width / 2.0, p.shoulder_height * p.transition],
         [p.nut_width / 2.0, 0.0],
     );
@@ -523,6 +542,23 @@ mod tests {
                 inset: 10.0,
             },
         }
+    }
+    #[test]
+    fn side_bulge_is_measured_at_midpoint_and_zero_is_straight() {
+        let mut p = sample();
+        p.slots.enabled = false;
+        p.tuners.layout = "none".into();
+        let g = headstock(p.clone()).unwrap();
+        let y0 = p.shoulder_height;
+        let span = p.length - p.crown_height - y0;
+        let x0 = -p.shoulder_width / 2.0;
+        let delta = -p.crown_width / 2.0 - x0;
+        for pt in &g.outline[48..=96] {
+            assert!((pt[0] - (x0 + delta * (pt[1] - y0) / span)).abs() < 1e-8);
+        }
+        p.left_bulge = 5.0;
+        let curved = headstock(p).unwrap();
+        assert!((curved.outline[72][0] - (x0 + delta / 2.0 - 5.0)).abs() < 1e-8);
     }
     #[test]
     fn symmetric_slots_and_exact_scale() {
