@@ -32,7 +32,7 @@ jobs:
           cargo fmt --all -- --check
           cargo clippy --locked --workspace --all-targets -- -D warnings
       - name: Lint new source
-        run: npx eslint 'app/api/v1/[...path]/route.ts' app/rust-fretboard/page.tsx backend/cloudflare/*.js backend/scripts/*.mjs backend/tests/*.mjs backend/tests/*.cjs side-template/rust-client.js
+        run: npx eslint 'app/api/v1/[...path]/route.ts' app/rust-fretboard/page.tsx app/rust-headstock/page.tsx backend/cloudflare/*.js backend/scripts/*.mjs backend/tests/*.mjs backend/tests/*.cjs side-template/rust-client.js
       - name: Native, Wasm, parity, HTTP and client-state tests
         run: npm run backend:test
       - name: Verify isolated Worker packaging (no deployment)

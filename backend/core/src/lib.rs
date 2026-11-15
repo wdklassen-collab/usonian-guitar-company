@@ -1,6 +1,8 @@
 //! Millimeter geometry independent of HTTP, JavaScript, and Cloudflare.
+mod headstock;
 mod side;
 mod svg;
+pub use headstock::{headstock, HeadstockRequest};
 use serde::{Deserialize, Serialize};
 pub use side::{side, Parameters, SideRequest};
 
@@ -89,6 +91,9 @@ pub fn generate(tool: &str, input: &str) -> String {
     let result = match tool {
         "side-top" => decode::<SideRequest>(input)
             .and_then(side)
+            .and_then(|v| serde_json::to_value(v).map_err(|_| invalid("Serialization failed"))),
+        "headstock" => decode::<HeadstockRequest>(input)
+            .and_then(headstock)
             .and_then(|v| serde_json::to_value(v).map_err(|_| invalid("Serialization failed"))),
         "fretboard" => decode::<FretboardRequest>(input)
             .and_then(fretboard)

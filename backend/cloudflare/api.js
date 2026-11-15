@@ -9,9 +9,9 @@ export function createApi(generate) {
       if(request.method!=='GET')return error('method_not_allowed','Use GET.',405,{allow:'GET'});
       const check=JSON.parse(generate('fretboard','{"scaleLength":650,"fretCount":12,"nutWidth":44,"endWidth":55}'));
       if(!check.ok || check.data.frets[11].x!==325)return error('core_unavailable','Geometry core failed health check.',503);
-      return json({ok:true,apiVersion:'v1',engine:'rust-wasm',units:'mm',tools:['side-top','fretboard']});
+      return json({ok:true,apiVersion:'v1',engine:'rust-wasm',units:'mm',tools:['side-top','fretboard','headstock']});
     }
-    const tool={'/api/v1/side-top':'side-top','/api/v1/fretboard':'fretboard'}[path];
+    const tool={'/api/v1/side-top':'side-top','/api/v1/fretboard':'fretboard','/api/v1/headstock':'headstock'}[path];
     if(!tool)return error('not_found','Unknown API endpoint.',404);
     if(request.method!=='POST')return error('method_not_allowed','Use POST.',405,{allow:'POST'});
     if(request.headers.get('content-type')?.split(';')[0].trim().toLowerCase()!=='application/json')return error('unsupported_media_type','Use application/json.',415);

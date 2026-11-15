@@ -48,7 +48,7 @@ const worker = {
     if (!testResponse.headers.get("content-type")?.includes("text/html")) return testResponse;
     return new HTMLRewriter().on("body", {
       element(element) {
-        element.prepend('<style>@media print{.usonian-test-banner{display:none!important}}</style><aside class="usonian-test-banner" style="background:#6a291c;color:white;padding:12px;text-align:center;font:16px sans-serif;position:relative;z-index:9999">TEST SITE — Rust development · <a style="color:white;text-decoration:underline" href="/side-template/?engine=rust">Side / Top</a> · <a style="color:white;text-decoration:underline" href="/rust-fretboard/">Rust Fretboard</a> · <a style="color:white;text-decoration:underline" href="https://usonianguitar.com">Production website</a></aside>', { html: true });
+        element.prepend('<style>@media print{.usonian-test-banner{display:none!important}}</style><aside class="usonian-test-banner" style="background:#6a291c;color:white;padding:12px;text-align:center;font:16px sans-serif;position:relative;z-index:9999">TEST SITE — Rust development · <a style="color:white;text-decoration:underline" href="/side-template/?engine=rust">Side / Top</a> · <a style="color:white;text-decoration:underline" href="/rust-fretboard/">Rust Fretboard</a> · <a style="color:white;text-decoration:underline" href="/rust-headstock/">Headstock</a> · <a style="color:white;text-decoration:underline" href="https://usonianguitar.com">Production website</a></aside>', { html: true });
       },
     }).transform(testResponse);
   },

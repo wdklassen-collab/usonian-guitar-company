@@ -1,6 +1,6 @@
 // Website-side proxy. The server setting is never taken from a browser URL.
 import {error,MAX_REQUEST_BYTES} from './api.js';
-const endpoints = new Set(['health','side-top','fretboard']);
+const endpoints = new Set(['health','side-top','fretboard','headstock']);
 export async function proxy(request, origin, upstreamFetch=fetch) {
   const path=new URL(request.url).pathname.replace(/\/$/,'');
   const endpoint=path.replace(/^\/api\/v1\//,'');
