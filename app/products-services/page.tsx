@@ -1,4 +1,4 @@
-const ebayStore = "https://www.ebay.com/str/usonianguitarco";
+const etsyStore = "https://www.etsy.com/shop/usonianguitarco";
 
 const offerings = [
   {
@@ -47,8 +47,8 @@ export default function ProductsServices() {
   return <main>
     <header className="site-header">
       <a className="brand brand-logo" href="/" aria-label="Usonian Guitar Co. home"><img src="/usonian-wordmark.svg" alt="Usonian Guitar Co."/></a>
-      <nav aria-label="Primary navigation"><a href="/">Home</a><a href="/products-services/">Products & Services</a><a href="/#tools">Tools</a><a href="/#about">About</a><a href="/#contact">Contact</a></nav>
-      <a className="header-shop" href={ebayStore} target="_blank" rel="noreferrer">Shop eBay</a>
+      <nav aria-label="Primary navigation"><a href="/">Home</a><a href="/products/">Products</a><a href="/products-services/">Products & Services</a><a href="/#tools">Tools</a><a href="/#about">About</a><a href="/#contact">Contact</a></nav>
+      <a className="header-shop" href={etsyStore} target="_blank" rel="noreferrer">Shop Etsy</a>
     </header>
 
     <section className="section products products-services">
@@ -85,6 +85,6 @@ export default function ProductsServices() {
       <a className="button primary" href="mailto:usonianguitar@outlook.com?subject=Custom%20Tool%20Request">Start a Custom Project</a>
     </section>
 
-    <footer><a className="brand" href="/"><img className="brand-mark-image" src="/usonian-shield-diamond.svg" alt="Usonian Guitar Co. shield logo"/><span>Usonian Guitar Co.</span></a><p>Independent lutherie tools from Colorado.</p><div><a href={ebayStore} target="_blank" rel="noreferrer">eBay Store</a><a href="/">Home</a></div><small>© {new Date().getFullYear()} Usonian Guitar Co., LLC</small></footer>
+    <footer><a className="brand" href="/"><img className="brand-mark-image" src="/usonian-shield-diamond.svg" alt="Usonian Guitar Co. shield logo"/><span>Usonian Guitar Co.</span></a><p>Independent lutherie tools from Colorado.</p><div><a href={etsyStore} target="_blank" rel="noreferrer">Etsy Store</a><a href="/">Home</a></div><small>© {new Date().getFullYear()} Usonian Guitar Co., LLC</small></footer>
   </main>;
 }
